@@ -22,11 +22,11 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project directory structure: ai_employee/, tests/, specs/
-- [ ] T002 Initialize Python project with setup.py and requirements.txt
-- [ ] T003 [P] Create .env.example with ANTHROPIC_API_KEY, VAULT_PATH, WATCH_FOLDER, MAX_ITERATIONS, LOG_LEVEL
-- [ ] T004 [P] Create .gitignore with .env, venv/, __pycache__/, *.pyc, .pytest_cache/
-- [ ] T005 [P] Create README.md with project overview and setup instructions
+- [x] T001 Create project directory structure: ai_employee/, tests/, specs/
+- [x] T002 Initialize Python project with setup.py and requirements.txt
+- [x] T003 [P] Create .env.example with ANTHROPIC_API_KEY, VAULT_PATH, WATCH_FOLDER, MAX_ITERATIONS, LOG_LEVEL
+- [x] T004 [P] Create .gitignore with .env, venv/, __pycache__/, *.pyc, .pytest_cache/
+- [x] T005 [P] Create README.md with project overview and setup instructions
 
 ---
 
@@ -36,19 +36,19 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create ai_employee/__init__.py and ai_employee/__main__.py for CLI entry point
-- [ ] T007 Implement configuration management in ai_employee/config.py (load .env, parse CLI args)
-- [ ] T008 [P] Create ai_employee/models/__init__.py module
-- [ ] T009 [P] Create ai_employee/vault/__init__.py module
-- [ ] T010 [P] Create ai_employee/watcher/__init__.py module
-- [ ] T011 [P] Create ai_employee/processor/__init__.py module
-- [ ] T012 [P] Create ai_employee/utils/__init__.py module
-- [ ] T013 Implement logging infrastructure in ai_employee/utils/logger.py (file handler, formatters)
-- [ ] T014 Create data models: ai_employee/models/task.py with Task class (id, title, source_path, created_at, status, metadata)
-- [ ] T015 [P] Create data models: ai_employee/models/plan.py with Plan class (id, task_id, steps, approval_checkpoints, handbook_rules_applied)
-- [ ] T016 [P] Create data models: ai_employee/models/log_entry.py with LogEntry class (timestamp, action_type, task_id, details, outcome)
-- [ ] T017 Implement vault manager in ai_employee/vault/manager.py (create_vault, validate_structure, get_paths)
-- [ ] T018 Create CLI command: python -m ai_employee init --vault-path PATH (calls vault manager)
+- [x] T006 Create ai_employee/__init__.py and ai_employee/__main__.py for CLI entry point
+- [x] T007 Implement configuration management in ai_employee/config.py (load .env, parse CLI args)
+- [x] T008 [P] Create ai_employee/models/__init__.py module
+- [x] T009 [P] Create ai_employee/vault/__init__.py module
+- [x] T010 [P] Create ai_employee/watcher/__init__.py module
+- [x] T011 [P] Create ai_employee/processor/__init__.py module
+- [x] T012 [P] Create ai_employee/utils/__init__.py module
+- [x] T013 Implement logging infrastructure in ai_employee/utils/logger.py (file handler, formatters)
+- [x] T014 Create data models: ai_employee/models/task.py with Task class (id, title, source_path, created_at, status, metadata)
+- [x] T015 [P] Create data models: ai_employee/models/plan.py with Plan class (id, task_id, steps, approval_checkpoints, handbook_rules_applied)
+- [x] T016 [P] Create data models: ai_employee/models/log_entry.py with LogEntry class (timestamp, action_type, task_id, details, outcome)
+- [x] T017 Implement vault manager in ai_employee/vault/manager.py (create_vault, validate_structure, get_paths)
+- [x] T018 Create CLI command: python -m ai_employee init --vault-path PATH (calls vault manager)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -62,14 +62,14 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [P] [US1] Implement file tracker in ai_employee/utils/file_tracker.py (track processed files, prevent duplicates using JSON)
-- [ ] T020 [P] [US1] Implement task creator in ai_employee/watcher/task_creator.py (convert file to markdown with YAML frontmatter)
-- [ ] T021 [US1] Implement file watcher in ai_employee/watcher/file_watcher.py (watchdog Observer, FileSystemEventHandler, on_created event)
-- [ ] T022 [US1] Integrate file watcher with task creator (detect file → create task → log action)
-- [ ] T023 [US1] Implement dashboard updater in ai_employee/vault/dashboard.py (update_counts, add_activity_entry, render_dashboard)
-- [ ] T024 [US1] Add dashboard update to task creation flow (increment Needs Action count)
-- [ ] T025 [US1] Create CLI command: python -m ai_employee run --watch-folder PATH (start file watcher)
-- [ ] T026 [US1] Add graceful shutdown handling (Ctrl+C stops watcher cleanly)
+- [x] T019 [P] [US1] Implement file tracker in ai_employee/utils/file_tracker.py (track processed files, prevent duplicates using JSON)
+- [x] T020 [P] [US1] Implement task creator in ai_employee/watcher/task_creator.py (convert file to markdown with YAML frontmatter)
+- [x] T021 [US1] Implement file watcher in ai_employee/watcher/file_watcher.py (watchdog Observer, FileSystemEventHandler, on_created event)
+- [x] T022 [US1] Integrate file watcher with task creator (detect file → create task → log action)
+- [x] T023 [US1] Implement dashboard updater in ai_employee/vault/dashboard.py (update_counts, add_activity_entry, render_dashboard)
+- [x] T024 [US1] Add dashboard update to task creation flow (increment Needs Action count)
+- [x] T025 [US1] Create CLI command: python -m ai_employee run --watch-folder PATH (start file watcher)
+- [x] T026 [US1] Add graceful shutdown handling (Ctrl+C stops watcher cleanly)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - files are detected and converted to tasks
 
@@ -85,11 +85,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T027 [P] [US4] Create default Company_Handbook.md template in ai_employee/vault/manager.py (Critical/High/Medium/Low rules)
-- [ ] T028 [US4] Implement handbook parser in ai_employee/processor/handbook_parser.py (parse_handbook, extract rules with keywords/actions/priority)
-- [ ] T029 [US4] Implement rule matching in ai_employee/processor/handbook_parser.py (match_rules, apply_most_restrictive)
-- [ ] T030 [US4] Add handbook hot-reload detection (watch Company_Handbook.md for changes, reload rules)
-- [ ] T031 [US4] Add handbook validation on system startup (check structure, log errors if malformed)
+- [x] T027 [P] [US4] Create default Company_Handbook.md template in ai_employee/vault/manager.py (Critical/High/Medium/Low rules)
+- [x] T028 [US4] Implement handbook parser in ai_employee/processor/handbook_parser.py (parse_handbook, extract rules with keywords/actions/priority)
+- [x] T029 [US4] Implement rule matching in ai_employee/processor/handbook_parser.py (match_rules, apply_most_restrictive)
+- [x] T030 [US4] Add handbook hot-reload detection (watch Company_Handbook.md for changes, reload rules)
+- [x] T031 [US4] Add handbook validation on system startup (check structure, log errors if malformed)
 
 **Checkpoint**: Handbook system ready - rules can be parsed and matched against task content
 
@@ -103,18 +103,18 @@
 
 ### Implementation for User Story 2
 
-- [ ] T032 [P] [US2] Implement Claude client in ai_employee/processor/claude_client.py (initialize Anthropic SDK, handle API key)
-- [ ] T033 [US2] Create prompt templates in ai_employee/processor/claude_client.py (system prompt with handbook rules, user prompt with task)
-- [ ] T034 [US2] Implement plan generation in ai_employee/processor/claude_client.py (call Claude API, parse JSON response, create Plan object)
-- [ ] T035 [US2] Add retry logic with exponential backoff in ai_employee/processor/claude_client.py (use tenacity, 3 attempts, 1s-10s wait)
-- [ ] T036 [US2] Implement error handling for Claude API (rate limits, timeouts, invalid responses)
-- [ ] T037 [US2] Integrate handbook parser with Claude client (inject rules into system prompt, track applied rules)
-- [ ] T038 [US2] Implement plan file writer (save Plan object as markdown with YAML frontmatter in /Plans)
-- [ ] T039 [US2] Add approval checkpoint markers in plan content (**[APPROVAL REQUIRED]** at specified indices)
-- [ ] T040 [US2] Implement task processor in ai_employee/processor/task_processor.py (read /Needs_Action, generate plan, move to /Done)
-- [ ] T041 [US2] Add task status updates (needs_action → processing → done)
-- [ ] T042 [US2] Update dashboard after plan generation (decrement Needs Action, increment Completed)
-- [ ] T043 [US2] Log all plan generation attempts (success, failure, API errors)
+- [x] T032 [P] [US2] Implement Claude client in ai_employee/processor/claude_client.py (initialize Anthropic SDK, handle API key)
+- [x] T033 [US2] Create prompt templates in ai_employee/processor/claude_client.py (system prompt with handbook rules, user prompt with task)
+- [x] T034 [US2] Implement plan generation in ai_employee/processor/claude_client.py (call Claude API, parse JSON response, create Plan object)
+- [x] T035 [US2] Add retry logic with exponential backoff in ai_employee/processor/claude_client.py (use tenacity, 3 attempts, 1s-10s wait)
+- [x] T036 [US2] Implement error handling for Claude API (rate limits, timeouts, invalid responses)
+- [x] T037 [US2] Integrate handbook parser with Claude client (inject rules into system prompt, track applied rules)
+- [x] T038 [US2] Implement plan file writer (save Plan object as markdown with YAML frontmatter in /Plans)
+- [x] T039 [US2] Add approval checkpoint markers in plan content (**[APPROVAL REQUIRED]** at specified indices)
+- [x] T040 [US2] Implement task processor in ai_employee/processor/task_processor.py (read /Needs_Action, generate plan, move to /Done)
+- [x] T041 [US2] Add task status updates (needs_action → processing → done)
+- [x] T042 [US2] Update dashboard after plan generation (decrement Needs Action, increment Completed)
+- [x] T043 [US2] Log all plan generation attempts (success, failure, API errors)
 
 **Checkpoint**: Plan generation working - tasks are analyzed and actionable plans are created
 
@@ -128,13 +128,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T044 [US3] Implement processing loop in ai_employee/processor/task_processor.py (iterate until /Needs_Action empty or max iterations)
-- [ ] T045 [US3] Add iteration counter and max limit check (default 10, configurable via CLI)
-- [ ] T046 [US3] Implement error recovery in loop (catch exceptions, log error, continue with next task)
-- [ ] T047 [US3] Add loop completion logging (success message when queue empty, warning when max iterations reached)
-- [ ] T048 [US3] Update dashboard after each loop iteration (current counts, recent activity)
-- [ ] T049 [US3] Add loop status to dashboard (Running/Idle/Error)
-- [ ] T050 [US3] Integrate loop with file watcher (watcher detects → loop processes → repeat)
+- [x] T044 [US3] Implement processing loop in ai_employee/processor/task_processor.py (iterate until /Needs_Action empty or max iterations)
+- [x] T045 [US3] Add iteration counter and max limit check (default 10, configurable via CLI)
+- [x] T046 [US3] Implement error recovery in loop (catch exceptions, log error, continue with next task)
+- [x] T047 [US3] Add loop completion logging (success message when queue empty, warning when max iterations reached)
+- [x] T048 [US3] Update dashboard after each loop iteration (current counts, recent activity)
+- [x] T049 [US3] Add loop status to dashboard (Running/Idle/Error)
+- [x] T050 [US3] Integrate loop with file watcher (watcher detects → loop processes → repeat)
 
 **Checkpoint**: All user stories should now be independently functional - system operates autonomously
 
