@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git fetch --all --prune)",
-      "Bash(.specify/scripts/bash/setup-plan.sh:*)"
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json)"
     ]
   }
 }
