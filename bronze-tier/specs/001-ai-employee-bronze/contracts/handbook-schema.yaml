@@ -1,0 +1,365 @@
+# Handbook Schema
+
+**Purpose**: Define the structure for Company_Handbook.md and rule parsing
+
+**Version**: 1.0.0
+
+**File Location**: `/Company_Handbook.md` (root of vault)
+
+## File Structure
+
+```markdown
+# Company Handbook
+
+## {Priority Level 1}
+
+### {Rule Title 1}
+**Keywords**: {comma, separated, keywords}
+**Action**: {flag|require_approval|warn|block}
+
+{Rule description and explanation}
+
+### {Rule Title 2}
+**Keywords**: {keywords}
+**Action**: {action}
+
+{Rule description}
+
+## {Priority Level 2}
+
+### {Rule Title 3}
+...
+```
+
+## Priority Levels
+
+Priority is determined by the section heading level:
+
+```yaml
+## Critical Rules
+  priority: critical
+  description: Non-negotiable rules that must always be enforced
+
+## High Priority Rules
+  priority: high
+  description: Important rules that should be enforced in most cases
+
+## Medium Priority Rules
+  priority: medium
+  description: Guidelines that should be followed when applicable
+
+## Low Priority Rules
+  priority: low
+  description: Suggestions and best practices
+```
+
+## Rule Schema
+
+Each rule (### heading) has the following structure:
+
+```yaml
+title: string
+  description: The rule heading text
+  example: "Human approval required for payments >$50"
+
+keywords: array[string]
+  description: Comma-separated terms that trigger this rule
+  example: ["payment", "transfer", "invoice", "$", "money"]
+
+action: enum
+  values: ["flag", "require_approval", "warn", "block"]
+  description: What to do when rule matches
+
+  flag: Highlight the task in the plan
+  require_approval: Insert approval checkpoint in plan
+  warn: Add warning message to plan
+  block: Prevent plan generation entirely
+
+rule_text: string
+  description: Full explanation of the rule
+  example: "Any task involving financial transactions over $50..."
+
+priority: enum
+  values: ["critical", "high", "medium", "low"]
+  description: Inherited from parent section heading
+```
+
+## Action Types
+
+### flag
+- **Behavior**: Add visual indicator to plan
+- **Use Case**: Urgent tasks, time-sensitive items
+- **Example**: "Always flag urgent emails"
+
+### require_approval
+- **Behavior**: Insert `**[APPROVAL REQUIRED]**` checkpoint in plan
+- **Use Case**: Sensitive actions, financial transactions
+- **Example**: "Human approval required for payments >$50"
+
+### warn
+- **Behavior**: Add warning message to plan's Warnings section
+- **Use Case**: Risky actions, external communications
+- **Example**: "Log all external communications"
+
+### block
+- **Behavior**: Prevent plan generation, return error
+- **Use Case**: Prohibited actions, security violations
+- **Example**: "Never share sensitive data externally"
+
+## Keyword Matching
+
+Rules are triggered when task content contains any of the specified keywords:
+
+```python
+# Case-insensitive matching
+# Partial word matching (e.g., "payment" matches "payments")
+# Multiple keywords use OR logic (any match triggers rule)
+
+def matches_rule(task_content: str, keywords: list[str]) -> bool:
+    content_lower = task_content.lower()
+    return any(keyword.lower() in content_lower for keyword in keywords)
+```
+
+## Example: Complete Handbook File
+
+```markdown
+# Company Handbook
+
+## Critical Rules
+
+### Never share sensitive data externally
+**Keywords**: password, API key, token, credential, secret, private key
+**Action**: block
+
+Tasks must not include steps that transmit sensitive information outside the local system. This includes:
+- Passwords and authentication credentials
+- API keys and tokens
+- Private encryption keys
+- Personal identifiable information (PII)
+
+If a task requires sharing credentials, it must be done through secure channels with explicit approval.
+
+### Human approval required for payments >$50
+**Keywords**: payment, transfer, invoice, $, money, pay, purchase
+**Action**: require_approval
+
+Any task involving financial transactions over $50 must include an explicit approval checkpoint before execution. This applies to:
+- Invoice payments
+- Subscription purchases
+- Vendor payments
+- Refunds and reimbursements
+
+The approval checkpoint must clearly state the amount and recipient.
+
+## High Priority Rules
+
+### Always flag urgent emails
+**Keywords**: urgent, ASAP, immediate, critical, emergency, priority
+**Action**: flag
+
+Tasks containing urgent keywords should be highlighted in the plan for immediate attention. The plan should include a note about the urgency level.
+
+### Verify external communications before sending
+**Keywords**: email, send, message, notify, contact, reply
+**Action**: warn
+
+Plans involving external communications should include a verification step to ensure:
+- Recipient is correct
+- Message content is appropriate
+- Attachments are included
+- Tone is professional
+
+## Medium Priority Rules
+
+### Log all external communications
+**Keywords**: email, send, message, notify, contact
+**Action**: warn
+
+Tasks involving external communications should include a logging step to maintain an audit trail. Log should include:
+- Date and time
+- Recipient
+- Subject/purpose
+- Outcome
+
+### Document significant decisions
+**Keywords**: decision, choose, select, approve, reject
+**Action**: warn
+
+When a task involves making a significant decision, the plan should include a documentation step to record:
+- Options considered
+- Decision made
+- Rationale
+- Date and decision maker
+
+## Low Priority Rules
+
+### Use templates when available
+**Keywords**: email, report, document, presentation
+**Action**: flag
+
+When creating documents or communications, check if a template exists and use it for consistency.
+
+### Follow naming conventions
+**Keywords**: file, folder, document, create
+**Action**: warn
+
+When creating files or folders, follow the established naming conventions:
+- Use descriptive names
+- Include dates in YYYY-MM-DD format
+- Avoid special characters
+- Use underscores instead of spaces
+```
+
+## Parsing Logic
+
+```python
+import re
+from typing import List, Dict
+
+def parse_handbook(handbook_content: str) -> List[Dict]:
+    """Parse Company_Handbook.md into structured rules"""
+
+    rules = []
+    current_priority = None
+
+    lines = handbook_content.split('\n')
+    i = 0
+
+    while i < len(lines):
+        line = lines[i].strip()
+
+        # Detect priority section (## heading)
+        if line.startswith('## '):
+            priority_text = line[3:].lower()
+            if 'critical' in priority_text:
+                current_priority = 'critical'
+            elif 'high' in priority_text:
+                current_priority = 'high'
+            elif 'medium' in priority_text:
+                current_priority = 'medium'
+            elif 'low' in priority_text:
+                current_priority = 'low'
+
+        # Detect rule (### heading)
+        elif line.startswith('### '):
+            rule_title = line[4:]
+            keywords = []
+            action = None
+            rule_text = []
+
+            # Parse rule metadata and content
+            i += 1
+            while i < len(lines) and not lines[i].startswith('#'):
+                line = lines[i].strip()
+
+                if line.startswith('**Keywords**:'):
+                    keywords_str = line.split(':', 1)[1].strip()
+                    keywords = [k.strip() for k in keywords_str.split(',')]
+
+                elif line.startswith('**Action**:'):
+                    action = line.split(':', 1)[1].strip()
+
+                elif line and not line.startswith('**'):
+                    rule_text.append(line)
+
+                i += 1
+
+            if keywords and action:
+                rules.append({
+                    'title': rule_title,
+                    'keywords': keywords,
+                    'action': action,
+                    'priority': current_priority,
+                    'rule_text': ' '.join(rule_text)
+                })
+
+            continue
+
+        i += 1
+
+    return rules
+```
+
+## Validation Rules
+
+1. **File Structure**: Must start with `# Company Handbook`
+2. **Priority Sections**: Must have at least one `## {Priority}` section
+3. **Rule Format**: Each rule must have:
+   - `### {Title}` heading
+   - `**Keywords**: {list}` line
+   - `**Action**: {action}` line
+   - Rule description text
+4. **Keywords**: Must be comma-separated, at least one keyword per rule
+5. **Action**: Must be one of: flag, require_approval, warn, block
+6. **Priority**: Must be inferred from parent section
+
+## Default Handbook Template
+
+When initializing a new vault, create this default handbook:
+
+```markdown
+# Company Handbook
+
+## Critical Rules
+
+### Human approval required for payments >$50
+**Keywords**: payment, transfer, invoice, $, money
+**Action**: require_approval
+
+Any task involving financial transactions over $50 must include an explicit approval checkpoint before execution.
+
+### Never share sensitive data externally
+**Keywords**: password, API key, token, credential, secret
+**Action**: block
+
+Tasks must not include steps that transmit sensitive information outside the local system.
+
+## High Priority Rules
+
+### Always flag urgent emails
+**Keywords**: urgent, ASAP, immediate, critical
+**Action**: flag
+
+Tasks containing urgent keywords should be highlighted in the plan for immediate attention.
+
+## Medium Priority Rules
+
+### Log all external communications
+**Keywords**: email, send, message, notify
+**Action**: warn
+
+Tasks involving external communications should include a logging step to maintain an audit trail.
+```
+
+## Rule Conflict Resolution
+
+When multiple rules match a task:
+
+1. **Priority Order**: Critical > High > Medium > Low
+2. **Action Precedence**: block > require_approval > warn > flag
+3. **Apply Most Restrictive**: If conflicts occur, use the most restrictive action
+4. **Log All Matches**: Record all matched rules in plan's `handbook_rules_applied` field
+
+Example:
+```
+Task contains: "urgent payment of $100"
+
+Matched rules:
+- "Always flag urgent emails" (High, flag)
+- "Human approval required for payments >$50" (Critical, require_approval)
+
+Resolution:
+- Apply require_approval (more restrictive than flag)
+- Log both rules in handbook_rules_applied
+- Add approval checkpoint in plan
+```
+
+## Implementation Notes
+
+- Parse handbook on system startup and cache in memory
+- Reload handbook when file modification detected (hot reload)
+- Validate handbook structure on load, log errors if invalid
+- Provide clear error messages for malformed rules
+- Support comments in handbook (lines starting with `<!--`)
+- Case-insensitive keyword matching
+- Partial word matching (e.g., "pay" matches "payment")
