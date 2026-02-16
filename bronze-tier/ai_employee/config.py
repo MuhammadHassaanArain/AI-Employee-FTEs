@@ -41,11 +41,13 @@ class Config:
 
         # Optional: Paths and behavior
         self.vault_path = Path(
-            vault_path or os.getenv("VAULT_PATH", "./AI_Employee_Vault")
+            vault_path or os.getenv("VAULT_PATH", "./ai_employee_vault")
         )
 
+        # Default watch folder is Inbox inside vault
+        default_watch = str(self.vault_path / "Inbox")
         self.watch_folder = Path(
-            watch_folder or os.getenv("WATCH_FOLDER", "./monitored")
+            watch_folder or os.getenv("WATCH_FOLDER", default_watch)
         )
 
         self.max_iterations = (

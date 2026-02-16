@@ -26,7 +26,6 @@ class VaultManager:
             "inbox": self.vault_path / "Inbox",
             "needs_action": self.vault_path / "Needs_Action",
             "done": self.vault_path / "Done",
-            "plans": self.vault_path / "Plans",
         }
 
     def create_vault(self) -> None:
@@ -109,7 +108,6 @@ class VaultManager:
             "inbox": self.folders["inbox"],
             "needs_action": self.folders["needs_action"],
             "done": self.folders["done"],
-            "plans": self.folders["plans"],
             "dashboard": self.vault_path / "Dashboard.md",
             "handbook": self.vault_path / "Company_Handbook.md",
             "activity_log": self.vault_path / "activity.log",
@@ -117,71 +115,24 @@ class VaultManager:
 
     def _get_default_dashboard(self) -> str:
         """Get default Dashboard.md content"""
-        from datetime import datetime
-
-        return f"""# AI Employee Dashboard
-
-**Last Updated**: {datetime.utcnow().isoformat()}Z
-**System Status**: Idle
+        return """# AI Employee Dashboard
 
 ## Task Counts
+- Inbox: 0
+- Needs_Action: 0
+- Done: 0
 
-- **Needs Action**: 0 tasks
-- **In Progress**: 0 tasks
-- **Completed Today**: 0 tasks
-- **Total Completed**: 0 tasks
-- **Errors**: 0 tasks
+## Activity Log
 
-## Recent Activity (Last 10 Actions)
-
-_No activity yet_
-
-## System Configuration
-
-- **Monitored Folder**: Not configured
-- **Vault Path**: {self.vault_path}
-- **Max Iterations**: 10
-- **Claude Model**: claude-3-5-sonnet-20241022
-
-## Quick Links
-
-- [[Company_Handbook]]
-- [[Needs_Action/]]
-- [[Plans/]]
-- [[Done/]]
 """
 
     def _get_default_handbook(self) -> str:
         """Get default Company_Handbook.md content"""
         return """# Company Handbook
 
-## Critical Rules
-
-### Human approval required for payments >$50
-**Keywords**: payment, transfer, invoice, $, money
-**Action**: require_approval
-
-Any task involving financial transactions over $50 must include an explicit approval checkpoint before execution.
-
-### Never share sensitive data externally
-**Keywords**: password, API key, token, credential, secret
-**Action**: block
-
-Tasks must not include steps that transmit sensitive information outside the local system.
-
-## High Priority Rules
-
-### Always flag urgent emails
-**Keywords**: urgent, ASAP, immediate, critical
-**Action**: flag
-
-Tasks containing urgent keywords should be highlighted in the plan for immediate attention.
-
-## Medium Priority Rules
-
-### Log all external communications
-**Keywords**: email, send, message, notify
-**Action**: warn
-
-Tasks involving external communications should include a logging step to maintain an audit trail.
+## Rules
+- [CRITICAL] Never delete original files.
+- [HIGH] Ask for approval before sending emails.
+- [MEDIUM] Summaries under 200 words.
+- [LOW] Use bullet points when possible.
 """

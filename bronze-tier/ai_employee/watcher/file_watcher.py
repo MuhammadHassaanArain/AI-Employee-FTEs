@@ -98,7 +98,7 @@ class TaskFileHandler(FileSystemEventHandler):
                 f"Created task from {file_path.name}"
             )
 
-            logger.info(f"Successfully created task {task.id} from {file_path}")
+            logger.success(f"Successfully created task {task.id} from {file_path}")
 
         except Exception as e:
             logger.error(f"Failed to process file {file_path}: {e}")

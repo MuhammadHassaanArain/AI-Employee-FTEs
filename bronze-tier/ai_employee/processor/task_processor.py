@@ -37,7 +37,6 @@ class TaskProcessor:
         self.vault_path = vault_path
         self.max_iterations = max_iterations
         self.needs_action_folder = vault_path / "Needs_Action"
-        self.plans_folder = vault_path / "Plans"
         self.activity_log_path = vault_path / "activity.log"
 
         # Initialize components
@@ -80,8 +79,8 @@ class TaskProcessor:
                 # Generate plan
                 plan = self.claude_client.generate_plan(task)
 
-                # Save plan
-                self._save_plan(plan, task.title)
+                # Append plan to task file
+                self._append_plan_to_task(task, plan, task_file)
 
                 # Move task to Done
                 self.task_creator.move_task_to_done(task.id)
@@ -110,7 +109,7 @@ class TaskProcessor:
                 self.dashboard_updater.increment_done()
 
                 processed_count += 1
-                logger.info(f"Successfully processed task {task.id}")
+                logger.success(f"Successfully processed task {task.id}")
 
             except Exception as e:
                 logger.error(f"Failed to process task {task_file.name}: {e}")
@@ -146,18 +145,36 @@ class TaskProcessor:
         """Save task to file"""
         task_file.write_text(task.to_markdown(), encoding="utf-8")
 
-    def _save_plan(self, plan: Plan, task_title: str) -> None:
+    def _append_plan_to_task(self, task: Task, plan: Plan, task_file: Path) -> None:
         """
-        Save plan to /Plans folder
+        Append plan to task file in Needs_Action
 
         Args:
+            task: Task object
             plan: Plan object
-            task_title: Title of the task (for plan heading)
+            task_file: Path to task file
         """
-        plan_file = self.plans_folder / f"plan-{plan.task_id}.md"
-        plan_content = plan.to_markdown(task_title)
-        plan_file.write_text(plan_content, encoding="utf-8")
-        logger.info(f"Saved plan to: {plan_file}")
+        # Read current task content
+        current_content = task_file.read_text(encoding="utf-8")
+
+        # Build plan section
+        plan_section = "\n\n---\n\n## AI Generated Plan\n\n"
+
+        for i, step in enumerate(plan.steps, 1):
+            if (i - 1) in plan.approval_checkpoints:
+                plan_section += f"{i}. **[APPROVAL REQUIRED]** {step}\n"
+            else:
+                plan_section += f"{i}. {step}\n"
+
+        if plan.warnings:
+            plan_section += "\n### Warnings\n"
+            for warning in plan.warnings:
+                plan_section += f"- {warning}\n"
+
+        # Append plan to task file
+        updated_content = current_content + plan_section
+        task_file.write_text(updated_content, encoding="utf-8")
+        logger.info(f"Appended plan to task file: {task_file}")
 
     def _log_activity(self, entry: LogEntry) -> None:
         """Write log entry to activity log"""
