@@ -52,6 +52,6 @@ htmlcov/
 logs/
 
 # AI Employee specific
-AI_Employee_Vault/
+ai_employee_vault/
 monitored/
 *.tmp

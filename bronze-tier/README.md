@@ -4,110 +4,154 @@ A foundational AI Employee that monitors a folder for new files, captures them a
 
 ## Features
 
-- **File Monitoring**: Automatically detects new files in a monitored folder
-- **Task Capture**: Converts files to structured tasks in Obsidian vault
-- **AI Planning**: Uses Claude to generate actionable plans with approval checkpoints
-- **Handbook Rules**: Enforces custom behavioral rules for plan generation
-- **Autonomous Operation**: Processes tasks continuously with configurable limits
-- **Dashboard**: Real-time status and activity tracking in Obsidian
-
-## Prerequisites
-
-- Python 3.11 or higher
-- Obsidian (for viewing the vault)
-- Claude API key from Anthropic
+- **Automated File Monitoring**: Watches vault Inbox folder for new files
+- **Task Capture**: Converts files to structured markdown tasks with YAML metadata
+- **AI-Powered Planning**: Uses Claude to generate actionable plans based on handbook rules
+- **Handbook-Guided Behavior**: Customizable rules for AI decision-making
+- **Dashboard Tracking**: Real-time task counts and activity logging
+- **Safe Operation**: Never deletes original files, includes approval checkpoints
 
 ## Quick Start
 
-### 1. Installation
+### Prerequisites
+
+- Python 3.11 or higher
+- Anthropic API key ([Get one here](https://console.anthropic.com/))
+- Obsidian (optional, for viewing vault)
+
+### Installation
 
 ```bash
-# Clone the repository
+# Navigate to project directory
 cd bronze-tier
 
-# Create virtual environment
+# Create virtual environment (recommended)
 python -m venv venv
 
 # Activate virtual environment
-# On Windows:
+# Windows:
 venv\Scripts\activate
-# On macOS/Linux:
+# macOS/Linux:
 source venv/bin/activate
 
-# Install dependencies
+# Install package
 pip install -e .
 ```
 
-### 2. Configuration
+### Configuration
 
 ```bash
 # Copy environment template
 cp .env.example .env
 
-# Edit .env and add your Claude API key
-# ANTHROPIC_API_KEY=sk-ant-your-key-here
+# Edit .env and add your API key
+# ANTHROPIC_API_KEY=sk-ant-your-actual-key-here
 ```
 
-### 3. Initialize Vault
+### Initialize Vault
 
 ```bash
-# Create the Obsidian vault structure
-python -m ai_employee init --vault-path ./AI_Employee_Vault
+python -m ai_employee init
 ```
 
-### 4. Run the AI Employee
+This creates the vault structure:
+```
+ai_employee_vault/
+├── Inbox/              # Drop files here (monitored)
+├── Needs_Action/       # Tasks being processed
+├── Done/               # Completed tasks with AI plans
+├── Dashboard.md        # Status overview
+├── Company_Handbook.md # Behavior rules
+└── activity.log        # System log
+```
+
+### Run the System
 
 ```bash
-# Create a folder to monitor
-mkdir monitored
-
-# Start the AI Employee
-python -m ai_employee run --watch-folder ./monitored
+python -m ai_employee run
 ```
 
-### 5. Test It
+Expected output:
+```
+Starting AI Employee...
+Vault: ai_employee_vault
+Watching: ai_employee_vault\Inbox
+[OK] File watcher started
+[OK] Monitoring: ai_employee_vault\Inbox
+[OK] Processing tasks automatically
+```
+
+### Test It
+
+In a **new terminal** (keep the system running):
 
 ```bash
-# In another terminal, add a test file
-echo "Review the Q1 sales report" > monitored/sales_task.txt
+# Create a test task
+echo "Review Q1 sales report and prepare summary" > ai_employee_vault/Inbox/test.txt
 
-# Check the vault in Obsidian:
-# - New task appears in /Needs_Action
-# - Plan generated in /Plans
-# - Task moved to /Done
-# - Dashboard updated
+# Wait 10-15 seconds for processing
 ```
 
-## Usage
-
-### Commands
+### Verify Results
 
 ```bash
-# Initialize vault
-python -m ai_employee init [--vault-path PATH]
+# View completed task with AI plan
+cat ai_employee_vault/Done/task-*.md
 
-# Run the AI Employee
-python -m ai_employee run [OPTIONS]
+# Check dashboard
+cat ai_employee_vault/Dashboard.md
 
-# Options for run command:
-#   --vault-path PATH       Path to Obsidian vault (default: ./AI_Employee_Vault)
-#   --watch-folder PATH     Folder to monitor (default: ./monitored)
-#   --max-iterations N      Max tasks per cycle (default: 10)
-#   --log-level LEVEL       Logging level (default: INFO)
+# View activity log
+tail -f ai_employee_vault/activity.log
 ```
 
-### Customizing Behavior
+## How It Works
 
-Edit `AI_Employee_Vault/Company_Handbook.md` to add your own rules:
+1. **File Detection**: System monitors `Inbox/` folder for new files
+2. **Task Creation**: Converts files to markdown with YAML metadata in `Needs_Action/`
+3. **AI Planning**: Claude reads `Company_Handbook.md` and generates action plan
+4. **Plan Integration**: AI plan is appended to the task file
+5. **Completion**: Task moved to `Done/` folder
+6. **Dashboard Update**: Counts and activity log updated
+7. **Preservation**: Original file remains in Inbox (never deleted)
+
+## Customizing Behavior
+
+Edit `ai_employee_vault/Company_Handbook.md` to customize AI behavior:
 
 ```markdown
-## High Priority Rules
+# Company Handbook
 
-### Require approval for vendor contracts
-**Keywords**: contract, vendor, agreement, NDA
-**Action**: require_approval
+## Rules
+- [CRITICAL] Never delete original files.
+- [HIGH] Ask for approval before sending emails.
+- [MEDIUM] Summaries under 200 words.
+- [LOW] Use bullet points when possible.
+```
 
-Any task involving vendor contracts must include an approval checkpoint.
+Add your own rules to guide the AI's decision-making process.
+
+## CLI Commands
+
+### Initialize Vault
+```bash
+python -m ai_employee init [--vault-path PATH]
+```
+
+### Run System
+```bash
+python -m ai_employee run [OPTIONS]
+
+Options:
+  --vault-path PATH       Path to vault (default: ./ai_employee_vault)
+  --watch-folder PATH     Folder to monitor (default: vault/Inbox)
+  --max-iterations N      Max tasks per cycle (default: 10)
+  --log-level LEVEL       Logging level (default: INFO)
+```
+
+### Show Configuration
+```bash
+python -m ai_employee config --show
 ```
 
 ## Project Structure
@@ -121,36 +165,73 @@ bronze-tier/
 │   ├── processor/        # Task processing and Claude integration
 │   └── utils/            # Logging and utilities
 ├── tests/                # Test suite
-│   ├── unit/            # Unit tests
-│   ├── integration/     # Integration tests
-│   └── fixtures/        # Test fixtures
-├── specs/               # Design documents
-└── AI_Employee_Vault/   # Obsidian vault (created on init)
+├── specs/                # Design documents
+├── README.md             # This file
+├── QUICKSTART.md         # 5-minute setup guide
+├── TESTING.md            # Comprehensive testing procedures
+├── CHANGES.md            # Technical change log
+└── requirements.txt      # Python dependencies
 ```
 
 ## Architecture
 
 - **Language**: Python 3.11+
 - **File Monitoring**: watchdog library
-- **AI Integration**: Anthropic SDK (Claude)
+- **AI Integration**: Anthropic SDK (Claude 3.5 Sonnet)
 - **Storage**: File-based (markdown with YAML frontmatter)
-- **Testing**: pytest
+- **Vault Format**: Obsidian-compatible markdown
 
 ## Success Criteria
 
-- ✅ Detects files within 60 seconds
-- ✅ Generates plans in under 10 seconds
-- ✅ Processes 10 tasks in under 5 minutes
-- ✅ Zero autonomous sensitive actions without approval
-- ✅ 24-hour uptime without crashes
+- ✓ Detects files within 60 seconds
+- ✓ Generates plans in under 10 seconds per task
+- ✓ Processes 10 tasks in under 5 minutes
+- ✓ Zero autonomous sensitive actions without approval
+- ✓ 24-hour uptime without crashes
+- ✓ Never deletes original files
 
-## Documentation
+## Troubleshooting
 
-- [Specification](specs/001-ai-employee-bronze/spec.md) - Feature requirements
-- [Architecture Plan](specs/001-ai-employee-bronze/plan.md) - Technical design
-- [Data Model](specs/001-ai-employee-bronze/data-model.md) - Entity schemas
-- [Quickstart Guide](specs/001-ai-employee-bronze/quickstart.md) - Detailed setup
-- [Tasks](specs/001-ai-employee-bronze/tasks.md) - Implementation tasks
+### "ANTHROPIC_API_KEY not found"
+- Verify `.env` file exists in `bronze-tier/` directory
+- Check it contains: `ANTHROPIC_API_KEY=sk-ant-...`
+- No quotes needed around the key
+
+### "No module named 'ai_employee'"
+- Run: `pip install -e .` from `bronze-tier/` directory
+- Activate virtual environment if using one
+
+### Files not being detected
+- Verify files are in `ai_employee_vault/Inbox/`
+- Check console output for errors
+- View logs: `tail -f ai_employee_vault/activity.log`
+
+### Plans not generated
+- Verify API key is valid and active
+- Check internet connection
+- Look for rate limit errors in logs
+- Ensure Claude API is accessible
+
+### Permission errors
+- Check read/write permissions on vault directory
+- Run with appropriate user permissions
+
+## Testing
+
+Run the integration test suite:
+
+```bash
+# Run all tests
+pytest
+
+# Run specific test
+python tests/test_bronze_tier.py
+
+# Run with verbose output
+pytest -v
+```
+
+See `TESTING.md` for comprehensive testing procedures.
 
 ## Development
 
@@ -158,32 +239,55 @@ bronze-tier/
 # Install development dependencies
 pip install -e ".[dev]"
 
-# Run tests
-pytest
-
 # Format code
 black ai_employee tests
 
 # Lint code
 pylint ai_employee
 flake8 ai_employee
+
+# Type checking
+mypy ai_employee
 ```
 
-## Troubleshooting
+## Documentation
 
-### "API key not found"
-Check that `.env` file exists and contains `ANTHROPIC_API_KEY=sk-ant-...`
+- **README.md** (this file) - Main documentation and quick start
+- **QUICKSTART.md** - 5-minute setup guide with examples
+- **TESTING.md** - Comprehensive testing procedures
+- **CHANGES.md** - Technical change log and implementation details
+- **specs/** - Detailed specifications and architecture documents
 
-### "Permission denied"
-Ensure you have read/write permissions for vault and monitored folders
+## Limitations (Bronze Tier)
 
-### Files not being detected
-Verify the watch folder path and check logs: `tail -f AI_Employee_Vault/activity.log`
+By design, Bronze Tier has these limitations:
+- Single source monitoring (Inbox folder only)
+- No Gmail integration (planned for Silver/Gold tiers)
+- No task prioritization (FIFO processing)
+- No web interface (Obsidian only)
+- Manual plan execution (no autonomous actions)
+- Local storage only (no cloud sync)
+
+## Roadmap
+
+- **Silver Tier**: Gmail integration, task prioritization
+- **Gold Tier**: Multi-source monitoring, web interface, autonomous execution
 
 ## License
 
-[Your license here]
+MIT License - See [LICENSE](LICENSE) file for details.
 
 ## Version
 
-1.0.0 - Bronze Tier Initial Release
+1.0.0 - Bronze Tier Release
+
+## Support
+
+For issues, questions, or contributions:
+- Check `TESTING.md` for troubleshooting
+- Review `CHANGES.md` for technical details
+- See `specs/` for architecture documentation
+
+---
+
+**Status**: Production Ready ✓

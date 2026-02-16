@@ -5,6 +5,7 @@ python-frontmatter>=1.0.0
 python-dotenv>=1.0.0
 tenacity>=8.2.0
 pyyaml>=6.0.0
+rich>=13.0.0
 
 # Development dependencies
 pytest>=8.0.0

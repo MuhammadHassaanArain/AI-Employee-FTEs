@@ -24,6 +24,7 @@ class DashboardUpdater:
         """
         self.vault_path = vault_path
         self.dashboard_path = vault_path / "Dashboard.md"
+        self.inbox_folder = vault_path / "Inbox"
         self.needs_action_folder = vault_path / "Needs_Action"
         self.done_folder = vault_path / "Done"
         self.activity_log_path = vault_path / "activity.log"
@@ -32,12 +33,14 @@ class DashboardUpdater:
         """Update dashboard with current counts and activity"""
         try:
             # Get counts
+            inbox_count = self._count_files(self.inbox_folder)
             needs_action_count = self._count_tasks(self.needs_action_folder)
             done_count = self._count_tasks(self.done_folder)
             recent_activity = self._get_recent_activity(limit=10)
 
             # Build dashboard content
             content = self._build_dashboard_content(
+                inbox_count,
                 needs_action_count,
                 done_count,
                 recent_activity,
@@ -70,6 +73,13 @@ class DashboardUpdater:
             message: Activity message
         """
         self.update_dashboard()
+
+    def _count_files(self, folder: Path) -> int:
+        """Count all files in folder"""
+        if not folder.exists():
+            return 0
+        files = [f for f in folder.iterdir() if f.is_file() and not f.name.startswith('.')]
+        return len(files)
 
     def _count_tasks(self, folder: Path) -> int:
         """Count task files in folder"""
@@ -112,50 +122,25 @@ class DashboardUpdater:
 
     def _build_dashboard_content(
         self,
+        inbox_count: int,
         needs_action_count: int,
         done_count: int,
         recent_activity: List[str],
     ) -> str:
         """Build dashboard markdown content"""
-        timestamp = datetime.utcnow().isoformat() + "Z"
-
         content = f"""# AI Employee Dashboard
 
-**Last Updated**: {timestamp}
-**System Status**: Running
-
 ## Task Counts
+- Inbox: {inbox_count}
+- Needs_Action: {needs_action_count}
+- Done: {done_count}
 
-- **Needs Action**: {needs_action_count} tasks
-- **In Progress**: 0 tasks
-- **Completed Today**: {done_count} tasks
-- **Total Completed**: {done_count} tasks
-- **Errors**: 0 tasks
-
-## Recent Activity (Last 10 Actions)
+## Activity Log
 
 """
 
         if recent_activity:
-            for i, activity in enumerate(recent_activity, 1):
-                content += f"{i}. {activity}\n"
-        else:
-            content += "_No activity yet_\n"
-
-        content += f"""
-## System Configuration
-
-- **Monitored Folder**: {self.vault_path.parent / "monitored"}
-- **Vault Path**: {self.vault_path}
-- **Max Iterations**: 10
-- **Claude Model**: claude-3-5-sonnet-20241022
-
-## Quick Links
-
-- [[Company_Handbook]]
-- [[Needs_Action/]]
-- [[Plans/]]
-- [[Done/]]
-"""
+            for activity in recent_activity:
+                content += f"{activity}\n"
 
         return content

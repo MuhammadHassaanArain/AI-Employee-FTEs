@@ -21,8 +21,8 @@ def main():
     init_parser = subparsers.add_parser("init", help="Initialize Obsidian vault")
     init_parser.add_argument(
         "--vault-path",
-        default="./AI_Employee_Vault",
-        help="Path to create vault (default: ./AI_Employee_Vault)",
+        default="./ai_employee_vault",
+        help="Path to create vault (default: ./ai_employee_vault)",
     )
 
     # Run command
@@ -63,10 +63,11 @@ def main():
     try:
         if args.command == "init":
             # Initialize vault
+            from ai_employee.vault.manager import VaultManager
             vault_manager = VaultManager(args.vault_path)
             vault_manager.create_vault()
-            print(f"✓ Vault initialized at: {args.vault_path}")
-            print(f"✓ Open in Obsidian: {args.vault_path}")
+            print(f"[OK] Vault initialized at: {args.vault_path}")
+            print(f"[OK] Open in Obsidian: {args.vault_path}")
 
         elif args.command == "run":
             # Load configuration
@@ -115,10 +116,10 @@ def main():
 
             try:
                 watcher.start()
-                print(f"✓ File watcher started")
-                print(f"✓ Monitoring: {config.watch_folder}")
-                print(f"✓ Dashboard: {config.vault_path / 'Dashboard.md'}")
-                print(f"✓ Processing tasks automatically\n")
+                print(f"[OK] File watcher started")
+                print(f"[OK] Monitoring: {config.watch_folder}")
+                print(f"[OK] Dashboard: {config.vault_path / 'Dashboard.md'}")
+                print(f"[OK] Processing tasks automatically\n")
 
                 # Keep running and process tasks periodically
                 import time
@@ -135,8 +136,8 @@ def main():
             except KeyboardInterrupt:
                 print("\n\nShutting down gracefully...")
                 watcher.stop()
-                print("✓ File watcher stopped")
-                print("✓ All tasks saved")
+                print("[OK] File watcher stopped")
+                print("[OK] All tasks saved")
                 sys.exit(0)
 
         elif args.command == "config":
