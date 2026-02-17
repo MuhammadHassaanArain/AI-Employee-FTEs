@@ -1,7 +1,8 @@
 """
-Configuration management for AI Employee
+Configuration management for AI Employee (Bronze Tier - Local Only)
 
 Loads configuration from .env file and CLI arguments.
+No API keys required - all processing is done locally.
 """
 
 import os
@@ -10,7 +11,7 @@ from dotenv import load_dotenv
 
 
 class Config:
-    """Configuration manager for AI Employee"""
+    """Configuration manager for AI Employee (Bronze Tier)"""
 
     def __init__(
         self,
@@ -27,17 +28,13 @@ class Config:
             watch_folder: Folder to monitor (overrides .env)
             max_iterations: Max tasks per cycle (overrides .env)
             log_level: Logging level (overrides .env)
-        """
-        # Load .env file
-        load_dotenv()
 
-        # Required: API key
-        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
-        if not self.anthropic_api_key:
-            raise ValueError(
-                "ANTHROPIC_API_KEY not found. "
-                "Please set it in .env file or environment variables."
-            )
+        Note:
+            Bronze Tier operates locally without any API keys.
+            All task processing is done using rule-based logic.
+        """
+        # Load .env file (optional for Bronze Tier)
+        load_dotenv()
 
         # Optional: Paths and behavior
         self.vault_path = Path(
@@ -63,9 +60,6 @@ class Config:
 
     def validate(self):
         """Validate configuration"""
-        if not self.anthropic_api_key:
-            raise ValueError("ANTHROPIC_API_KEY is required")
-
         if self.max_iterations < 1:
             raise ValueError("MAX_ITERATIONS must be at least 1")
 

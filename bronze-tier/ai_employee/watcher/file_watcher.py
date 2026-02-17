@@ -4,9 +4,10 @@ File Watcher
 Monitors a folder for new files using watchdog library.
 """
 
+import time
 from pathlib import Path
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+from watchdog.events import FileSystemEventHandler, FileCreatedEvent, FileModifiedEvent
 from ai_employee.watcher.task_creator import TaskCreator
 from ai_employee.utils.file_tracker import FileTracker
 from ai_employee.vault.dashboard import DashboardUpdater
@@ -41,30 +42,80 @@ class TaskFileHandler(FileSystemEventHandler):
         self.dashboard_updater = dashboard_updater
         self.activity_log_path = activity_log_path
 
-    def on_created(self, event: FileCreatedEvent):
+    def _is_file_stable(self, file_path: Path, wait_time: float = 0.5, max_attempts: int = 10) -> bool:
         """
-        Handle file creation event
+        Check if file is stable (fully written) by monitoring size changes.
 
         Args:
-            event: File creation event
+            file_path: Path to file
+            wait_time: Time to wait between checks (seconds)
+            max_attempts: Maximum number of attempts
+
+        Returns:
+            True if file is stable, False otherwise
+        """
+        if not file_path.exists():
+            return False
+
+        try:
+            previous_size = -1
+            for attempt in range(max_attempts):
+                current_size = file_path.stat().st_size
+
+                # File size hasn't changed, it's stable
+                if current_size == previous_size and current_size > 0:
+                    return True
+
+                previous_size = current_size
+                time.sleep(wait_time)
+
+            # File still changing after max attempts, but proceed anyway
+            logger.warning(f"File {file_path.name} still changing after {max_attempts} attempts")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error checking file stability: {e}")
+            return False
+
+    def _should_process_file(self, file_path: Path) -> bool:
+        """
+        Check if file should be processed.
+
+        Args:
+            file_path: Path to file
+
+        Returns:
+            True if file should be processed, False otherwise
         """
         # Ignore directories
-        if event.is_directory:
-            return
-
-        file_path = Path(event.src_path)
+        if file_path.is_dir():
+            return False
 
         # Ignore hidden files and temp files
-        if file_path.name.startswith(".") or file_path.name.endswith(".tmp"):
+        if file_path.name.startswith(".") or file_path.name.endswith((".tmp", ".swp", "~")):
             logger.debug(f"Ignoring file: {file_path}")
-            return
+            return False
 
         # Check if already processed
         if self.file_tracker.is_processed(str(file_path.absolute())):
             logger.debug(f"File already processed: {file_path}")
-            return
+            return False
 
+        return True
+
+    def _process_file(self, file_path: Path):
+        """
+        Process a detected file and create a task.
+
+        Args:
+            file_path: Path to file to process
+        """
         logger.info(f"New file detected: {file_path}")
+
+        # Wait for file to be fully written
+        if not self._is_file_stable(file_path):
+            logger.warning(f"File not stable, skipping: {file_path}")
+            return
 
         try:
             # Log file detection
@@ -111,6 +162,46 @@ class TaskFileHandler(FileSystemEventHandler):
                     outcome="failure",
                 )
             )
+
+    def on_created(self, event: FileCreatedEvent):
+        """
+        Handle file creation event
+
+        Args:
+            event: File creation event
+        """
+        # Ignore directories
+        if event.is_directory:
+            return
+
+        file_path = Path(event.src_path)
+
+        # Check if should process
+        if not self._should_process_file(file_path):
+            return
+
+        # Process the file
+        self._process_file(file_path)
+
+    def on_modified(self, event: FileModifiedEvent):
+        """
+        Handle file modification event (catches pasted files on Windows)
+
+        Args:
+            event: File modification event
+        """
+        # Ignore directories
+        if event.is_directory:
+            return
+
+        file_path = Path(event.src_path)
+
+        # Check if should process
+        if not self._should_process_file(file_path):
+            return
+
+        # Process the file (this catches pasted files)
+        self._process_file(file_path)
 
     def _log_activity(self, entry: LogEntry):
         """Write log entry to activity log"""
