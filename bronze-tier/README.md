@@ -1,123 +1,186 @@
-# Personal AI Employee - Bronze Tier
+# Personal AI Employee - Bronze Tier (Claude Code Integration)
 
-A foundational AI Employee that monitors a folder for new files, captures them as tasks in an Obsidian vault, and generates actionable plans using Claude AI.
+A TRUE AI Employee where **Claude Code is the reasoning engine** and Python provides the sensory input.
 
-## Features
+## What Makes This Different
 
-- **Automated File Monitoring**: Watches vault Inbox folder for new files
-- **Task Capture**: Converts files to structured markdown tasks with YAML metadata
-- **AI-Powered Planning**: Uses Claude to generate actionable plans based on handbook rules
-- **Handbook-Guided Behavior**: Customizable rules for AI decision-making
-- **Dashboard Tracking**: Real-time task counts and activity logging
-- **Safe Operation**: Never deletes original files, includes approval checkpoints
+### Previous Implementation (Fake AI)
+- Python generated plans using hardcoded templates
+- Keyword matching: "email" → generic email steps
+- All similar tasks got identical plans
+- No actual AI reasoning
+
+### Current Implementation (Real AI)
+- **Claude Code generates plans dynamically**
+- Each task gets unique, contextual reasoning
+- Real AI decision-making based on content
+- Handbook rules applied intelligently
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         USER                                 │
+│                           ↓                                  │
+│                  Drops file in Inbox/                        │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   PYTHON WATCHER (Senses)                    │
+│  - Detects new files                                         │
+│  - Creates task in Needs_Action/                             │
+│  - Task has NO PLAN (just content + metadata)                │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                  CLAUDE CODE (Brain)                         │
+│  1. Reads task using task-reader skill                       │
+│  2. Reads handbook using handbook-reader skill               │
+│  3. REASONS about task (AI, not templates)                   │
+│  4. Generates contextual plan                                │
+│  5. Writes plan using plan-writer skill                      │
+│  6. Moves task using task-mover skill                        │
+│  7. Updates dashboard using dashboard-updater skill          │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    OBSIDIAN VAULT                            │
+│  - Done/ folder contains completed tasks with AI plans       │
+│  - Dashboard.md shows status                                 │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.11 or higher
-- Anthropic API key ([Get one here](https://console.anthropic.com/))
-- Obsidian (optional, for viewing vault)
-
-### Installation
-
+### 1. Install Dependencies
 ```bash
-# Navigate to project directory
-cd bronze-tier
-
-# Create virtual environment (recommended)
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install package
 pip install -e .
 ```
 
-### Configuration
-
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and add your API key
-# ANTHROPIC_API_KEY=sk-ant-your-actual-key-here
-```
-
-### Initialize Vault
-
+### 2. Initialize Vault
 ```bash
 python -m ai_employee init
 ```
 
-This creates the vault structure:
-```
-ai_employee_vault/
-├── Inbox/              # Drop files here (monitored)
-├── Needs_Action/       # Tasks being processed
-├── Done/               # Completed tasks with AI plans
-├── Dashboard.md        # Status overview
-├── Company_Handbook.md # Behavior rules
-└── activity.log        # System log
-```
-
-### Run the System
-
+### 3. Start File Watcher (Terminal 1)
 ```bash
-python -m ai_employee run
+python -m ai_employee watch
 ```
 
-Expected output:
-```
-Starting AI Employee...
-Vault: ai_employee_vault
-Watching: ai_employee_vault\Inbox
-[OK] File watcher started
-[OK] Monitoring: ai_employee_vault\Inbox
-[OK] Processing tasks automatically
-```
-
-### Test It
-
-In a **new terminal** (keep the system running):
-
+### 4. Drop a Test File (Terminal 2)
 ```bash
-# Create a test task
-echo "Review Q1 sales report and prepare summary" > ai_employee_vault/Inbox/test.txt
-
-# Wait 10-15 seconds for processing
+echo "Schedule engineering team meeting for next Monday to discuss API architecture" > ai_employee_vault/Inbox/meeting.txt
 ```
 
-### Verify Results
-
+### 5. Process with Claude Code (Terminal 2)
 ```bash
-# View completed task with AI plan
+python claude_runner.py
+```
+
+Claude Code will now:
+- Read the task
+- Understand the context
+- Generate a specific plan
+- Write it to the task file
+- Move task to Done
+
+### 6. Verify Results
+```bash
+# Check the task in Done folder
 cat ai_employee_vault/Done/task-*.md
 
 # Check dashboard
 cat ai_employee_vault/Dashboard.md
+```
 
-# View activity log
-tail -f ai_employee_vault/activity.log
+## Agent Skills
+
+Claude Code uses these skills to process tasks:
+
+| Skill | Purpose | File Operations |
+|-------|---------|-----------------|
+| **task-reader** | Read pending tasks | Read Needs_Action/*.md |
+| **handbook-reader** | Read behavioral rules | Read Company_Handbook.md |
+| **plan-writer** | Write AI-generated plans | Append to task files |
+| **task-mover** | Move completed tasks | Move Needs_Action → Done |
+| **dashboard-updater** | Update status dashboard | Edit Dashboard.md |
+
+All skills are defined in `.claude/skills/`
+
+## Project Structure
+
+```
+bronze-tier/
+├── ai_employee/              # Python package (senses only)
+│   ├── watcher/             # File monitoring
+│   ├── processor/           # Task detection (no plan generation)
+│   ├── vault/               # Vault management
+│   ├── models/              # Data structures
+│   └── utils/               # Logging, file tracking
+├── .claude/
+│   └── skills/              # Agent Skills for Claude Code
+│       ├── task-reader.skill.md
+│       ├── handbook-reader.skill.md
+│       ├── plan-writer.skill.md
+│       ├── task-mover.skill.md
+│       └── dashboard-updater.skill.md
+├── ai_employee_vault/       # Obsidian vault (created by init)
+│   ├── Inbox/              # Drop files here
+│   ├── Needs_Action/       # Tasks waiting for Claude Code
+│   ├── Done/               # Completed tasks with AI plans
+│   ├── Dashboard.md        # Status overview
+│   └── Company_Handbook.md # Behavioral rules
+├── claude_runner.py         # Invokes Claude Code to process tasks
+└── ARCHITECTURE.md          # Detailed architecture docs
 ```
 
 ## How It Works
 
-1. **File Detection**: System monitors `Inbox/` folder for new files
-2. **Task Creation**: Converts files to markdown with YAML metadata in `Needs_Action/`
-3. **AI Planning**: Claude reads `Company_Handbook.md` and generates action plan
-4. **Plan Integration**: AI plan is appended to the task file
-5. **Completion**: Task moved to `Done/` folder
-6. **Dashboard Update**: Counts and activity log updated
-7. **Preservation**: Original file remains in Inbox (never deleted)
+### Task Creation (Python)
+1. Watcher detects new file in Inbox
+2. Creates task file in Needs_Action with:
+   - YAML frontmatter (id, status, timestamps)
+   - Original file content
+   - **NO PLAN** (this is crucial)
 
-## Customizing Behavior
+### Task Processing (Claude Code)
+1. `claude_runner.py` identifies pending tasks
+2. Invokes Claude Code with task context
+3. Claude Code uses skills to:
+   - Read task content
+   - Read handbook rules
+   - **Reason about the task** (AI, not templates)
+   - Generate specific, actionable plan
+   - Write plan to task file
+   - Move task to Done
+   - Update dashboard
 
-Edit `ai_employee_vault/Company_Handbook.md` to customize AI behavior:
+### Key Insight
+The plan is generated by **Claude Code's reasoning**, not by Python templates. Different tasks get different plans based on their actual content.
+
+## Example: Different Tasks, Different Plans
+
+### Task 1: "Schedule meeting with engineering team"
+Claude Code generates:
+1. Identify required attendees
+2. Check calendar availability
+3. Prepare meeting agenda
+4. Send calendar invites
+5. Log meeting scheduled
+
+### Task 2: "Send invoice to client ABC"
+Claude Code generates:
+1. Locate invoice template
+2. Fill in client details and amounts
+3. **[APPROVAL REQUIRED]** Review invoice before sending
+4. Send invoice via email
+5. Log invoice sent
+
+Notice: Different tasks → Different plans → Different approval checkpoints
+
+## Handbook Rules
+
+Edit `ai_employee_vault/Company_Handbook.md` to customize behavior:
 
 ```markdown
 # Company Handbook
@@ -129,24 +192,23 @@ Edit `ai_employee_vault/Company_Handbook.md` to customize AI behavior:
 - [LOW] Use bullet points when possible.
 ```
 
-Add your own rules to guide the AI's decision-making process.
+Claude Code applies these rules when generating plans.
 
-## CLI Commands
+## Commands
 
 ### Initialize Vault
 ```bash
 python -m ai_employee init [--vault-path PATH]
 ```
 
-### Run System
+### Start File Watcher
 ```bash
-python -m ai_employee run [OPTIONS]
+python -m ai_employee watch [--vault-path PATH] [--watch-folder PATH]
+```
 
-Options:
-  --vault-path PATH       Path to vault (default: ./ai_employee_vault)
-  --watch-folder PATH     Folder to monitor (default: vault/Inbox)
-  --max-iterations N      Max tasks per cycle (default: 10)
-  --log-level LEVEL       Logging level (default: INFO)
+### Process Tasks with Claude Code
+```bash
+python claude_runner.py
 ```
 
 ### Show Configuration
@@ -154,140 +216,85 @@ Options:
 python -m ai_employee config --show
 ```
 
-## Project Structure
+## No External APIs Required
 
-```
-bronze-tier/
-├── ai_employee/           # Source code
-│   ├── models/           # Data models (Task, Plan, LogEntry)
-│   ├── vault/            # Vault management and dashboard
-│   ├── watcher/          # File monitoring and task creation
-│   ├── processor/        # Task processing and Claude integration
-│   └── utils/            # Logging and utilities
-├── tests/                # Test suite
-├── specs/                # Design documents
-├── README.md             # This file
-├── QUICKSTART.md         # 5-minute setup guide
-├── TESTING.md            # Comprehensive testing procedures
-├── CHANGES.md            # Technical change log
-└── requirements.txt      # Python dependencies
-```
+This implementation does NOT use:
+- ❌ Anthropic API
+- ❌ OpenAI API
+- ❌ Any external AI services
+- ❌ API keys or credentials
 
-## Architecture
+Claude Code runs locally using its native capabilities.
 
-- **Language**: Python 3.11+
-- **File Monitoring**: watchdog library
-- **AI Integration**: Anthropic SDK (Claude 3.5 Sonnet)
-- **Storage**: File-based (markdown with YAML frontmatter)
-- **Vault Format**: Obsidian-compatible markdown
+## Bronze Tier Constraints
 
-## Success Criteria
+By design, Bronze Tier has these limitations:
+- Single input source (Inbox folder only)
+- File-based storage (no database)
+- Local processing only
+- Manual plan execution (plans are generated, not executed)
+- No Gmail integration (Silver/Gold tier)
+- No web interface (Obsidian only)
 
-- ✓ Detects files within 60 seconds
-- ✓ Generates plans in under 10 seconds per task
-- ✓ Processes 10 tasks in under 5 minutes
-- ✓ Zero autonomous sensitive actions without approval
-- ✓ 24-hour uptime without crashes
-- ✓ Never deletes original files
+## Validation
+
+To verify the system works correctly:
+
+1. **Drop test file**: `echo "Test task" > ai_employee_vault/Inbox/test.txt`
+2. **Verify task created**: Check `ai_employee_vault/Needs_Action/` - task should have NO plan
+3. **Run Claude Code**: `python claude_runner.py`
+4. **Verify unique plan**: Check `ai_employee_vault/Done/` - task should have AI-generated plan
+5. **Drop different file**: `echo "Different task" > ai_employee_vault/Inbox/test2.txt`
+6. **Verify different plan**: New task should get a DIFFERENT plan (not a template)
 
 ## Troubleshooting
 
-### "ANTHROPIC_API_KEY not found"
-- Verify `.env` file exists in `bronze-tier/` directory
-- Check it contains: `ANTHROPIC_API_KEY=sk-ant-...`
-- No quotes needed around the key
+### "No tasks to process"
+- Check if files are in `ai_employee_vault/Inbox/`
+- Verify watcher is running: `python -m ai_employee watch`
+- Check `ai_employee_vault/Needs_Action/` for pending tasks
 
-### "No module named 'ai_employee'"
-- Run: `pip install -e .` from `bronze-tier/` directory
-- Activate virtual environment if using one
-
-### Files not being detected
-- Verify files are in `ai_employee_vault/Inbox/`
-- Check console output for errors
+### Tasks not being detected
+- Ensure watcher is running in a separate terminal
+- Check file permissions on Inbox folder
 - View logs: `tail -f ai_employee_vault/activity.log`
 
-### Plans not generated
-- Verify API key is valid and active
-- Check internet connection
-- Look for rate limit errors in logs
-- Ensure Claude API is accessible
-
-### Permission errors
-- Check read/write permissions on vault directory
-- Run with appropriate user permissions
-
-## Testing
-
-Run the integration test suite:
-
-```bash
-# Run all tests
-pytest
-
-# Run specific test
-python tests/test_bronze_tier.py
-
-# Run with verbose output
-pytest -v
-```
-
-See `TESTING.md` for comprehensive testing procedures.
+### Plans look generic
+- This means Claude Code is not being invoked correctly
+- Verify `claude_runner.py` is being used (not old Python automation)
+- Check that `local_plan_generator.py` has been deleted
 
 ## Development
 
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
+### File Changes from Previous Version
 
-# Format code
-black ai_employee tests
+**Deleted:**
+- `ai_employee/processor/local_plan_generator.py` (fake AI)
 
-# Lint code
-pylint ai_employee
-flake8 ai_employee
+**Modified:**
+- `ai_employee/processor/task_processor.py` (simplified to detection only)
+- `ai_employee/__main__.py` (removed autonomous processing loop)
+- `requirements.txt` (removed anthropic dependency)
 
-# Type checking
-mypy ai_employee
-```
-
-## Documentation
-
-- **README.md** (this file) - Main documentation and quick start
-- **QUICKSTART.md** - 5-minute setup guide with examples
-- **TESTING.md** - Comprehensive testing procedures
-- **CHANGES.md** - Technical change log and implementation details
-- **specs/** - Detailed specifications and architecture documents
-
-## Limitations (Bronze Tier)
-
-By design, Bronze Tier has these limitations:
-- Single source monitoring (Inbox folder only)
-- No Gmail integration (planned for Silver/Gold tiers)
-- No task prioritization (FIFO processing)
-- No web interface (Obsidian only)
-- Manual plan execution (no autonomous actions)
-- Local storage only (no cloud sync)
-
-## Roadmap
-
-- **Silver Tier**: Gmail integration, task prioritization
-- **Gold Tier**: Multi-source monitoring, web interface, autonomous execution
+**Created:**
+- `.claude/skills/task-reader.skill.md`
+- `.claude/skills/handbook-reader.skill.md`
+- `.claude/skills/plan-writer.skill.md`
+- `.claude/skills/task-mover.skill.md`
+- `.claude/skills/dashboard-updater.skill.md`
+- `claude_runner.py` (Claude Code orchestrator)
+- `ARCHITECTURE.md` (detailed architecture docs)
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) file for details.
+MIT License - See LICENSE file for details.
 
 ## Version
 
-1.0.0 - Bronze Tier Release
-
-## Support
-
-For issues, questions, or contributions:
-- Check `TESTING.md` for troubleshooting
-- Review `CHANGES.md` for technical details
-- See `specs/` for architecture documentation
+2.0.0 - Bronze Tier (Claude Code Integration)
 
 ---
 
-**Status**: Production Ready ✓
+**Status**: Transformed ✓
+
+This is now a TRUE AI Employee where Claude Code does the reasoning.
