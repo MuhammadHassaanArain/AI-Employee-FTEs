@@ -108,9 +108,9 @@ def main():
                 vault_path=config.vault_path,
             )
 
+            # Initialize task processor (Bronze Tier - Local Only)
             processor = TaskProcessor(
                 vault_path=config.vault_path,
-                api_key=config.anthropic_api_key,
                 max_iterations=config.max_iterations,
             )
 
@@ -148,7 +148,7 @@ def main():
             print(f"  Watch Folder: {config.watch_folder}")
             print(f"  Max Iterations: {config.max_iterations}")
             print(f"  Log Level: {config.log_level}")
-            print(f"  API Key: {'Set' if config.anthropic_api_key else 'Not Set'}")
+            print(f"  Mode: Bronze Tier (Local Only)")
 
     except KeyboardInterrupt:
         print("\n\nStopped by user")

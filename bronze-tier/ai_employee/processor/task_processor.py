@@ -9,7 +9,7 @@ from ai_employee.models.task import Task
 from ai_employee.models.plan import Plan
 from ai_employee.models.log_entry import LogEntry
 from ai_employee.watcher.task_creator import TaskCreator
-from ai_employee.processor.claude_client import ClaudeClient
+from ai_employee.processor.local_plan_generator import LocalPlanGenerator
 from ai_employee.processor.handbook_parser import HandbookParser
 from ai_employee.vault.dashboard import DashboardUpdater
 from ai_employee.utils.logger import get_logger
@@ -23,26 +23,28 @@ class TaskProcessor:
     def __init__(
         self,
         vault_path: Path,
-        api_key: str,
         max_iterations: int = 10,
     ):
         """
-        Initialize task processor
+        Initialize task processor (Bronze Tier - Local Only)
 
         Args:
             vault_path: Path to Obsidian vault
-            api_key: Anthropic API key
             max_iterations: Maximum tasks to process per cycle
+
+        Note:
+            This is the Bronze Tier implementation that processes tasks
+            locally without any external API calls.
         """
         self.vault_path = vault_path
         self.max_iterations = max_iterations
         self.needs_action_folder = vault_path / "Needs_Action"
         self.activity_log_path = vault_path / "activity.log"
 
-        # Initialize components
+        # Initialize components (all local, no API calls)
         self.task_creator = TaskCreator(vault_path)
         self.handbook_parser = HandbookParser(vault_path / "Company_Handbook.md")
-        self.claude_client = ClaudeClient(api_key, self.handbook_parser)
+        self.plan_generator = LocalPlanGenerator(self.handbook_parser)
         self.dashboard_updater = DashboardUpdater(vault_path)
 
     def process_tasks(self) -> int:
@@ -76,8 +78,8 @@ class TaskProcessor:
                 task.status = "processing"
                 self._save_task(task, task_file)
 
-                # Generate plan
-                plan = self.claude_client.generate_plan(task)
+                # Generate plan (local processing only)
+                plan = self.plan_generator.generate_plan(task)
 
                 # Append plan to task file
                 self._append_plan_to_task(task, plan, task_file)
