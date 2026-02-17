@@ -1,24 +1,20 @@
 """
-Task Processor
+Task Processor (Bronze Tier - Claude Code Integration)
 
-Processes tasks from /Needs_Action and generates plans.
+This module ONLY detects pending tasks and prepares them for Claude Code processing.
+It does NOT generate plans - that's Claude Code's job.
 """
 
 from pathlib import Path
 from ai_employee.models.task import Task
-from ai_employee.models.plan import Plan
 from ai_employee.models.log_entry import LogEntry
-from ai_employee.watcher.task_creator import TaskCreator
-from ai_employee.processor.local_plan_generator import LocalPlanGenerator
-from ai_employee.processor.handbook_parser import HandbookParser
-from ai_employee.vault.dashboard import DashboardUpdater
 from ai_employee.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
 class TaskProcessor:
-    """Processes tasks and generates plans"""
+    """Detects pending tasks for Claude Code processing"""
 
     def __init__(
         self,
@@ -26,157 +22,42 @@ class TaskProcessor:
         max_iterations: int = 10,
     ):
         """
-        Initialize task processor (Bronze Tier - Local Only)
+        Initialize task processor (Bronze Tier - Claude Code Integration)
 
         Args:
             vault_path: Path to Obsidian vault
             max_iterations: Maximum tasks to process per cycle
 
         Note:
-            This is the Bronze Tier implementation that processes tasks
-            locally without any external API calls.
+            This processor ONLY detects tasks. Claude Code generates plans.
         """
         self.vault_path = vault_path
         self.max_iterations = max_iterations
         self.needs_action_folder = vault_path / "Needs_Action"
         self.activity_log_path = vault_path / "activity.log"
 
-        # Initialize components (all local, no API calls)
-        self.task_creator = TaskCreator(vault_path)
-        self.handbook_parser = HandbookParser(vault_path / "Company_Handbook.md")
-        self.plan_generator = LocalPlanGenerator(self.handbook_parser)
-        self.dashboard_updater = DashboardUpdater(vault_path)
-
-    def process_tasks(self) -> int:
+    def get_pending_tasks(self) -> list[Path]:
         """
-        Process all tasks in /Needs_Action
+        Get list of pending task files in /Needs_Action
 
         Returns:
-            Number of tasks processed
+            List of task file paths, sorted by creation time (oldest first)
         """
-        logger.info("Starting task processing cycle")
-
-        # Get all task files
         task_files = list(self.needs_action_folder.glob("task-*.md"))
 
-        if not task_files:
-            logger.info("No tasks to process")
-            return 0
+        # Sort by creation time (oldest first)
+        task_files.sort(key=lambda f: f.stat().st_ctime)
 
-        # Limit to max iterations
-        tasks_to_process = task_files[: self.max_iterations]
-        logger.info(f"Processing {len(tasks_to_process)} tasks (max: {self.max_iterations})")
+        return task_files[:self.max_iterations]
 
-        processed_count = 0
-
-        for task_file in tasks_to_process:
-            try:
-                # Load task
-                task = self._load_task(task_file)
-
-                # Update status to processing
-                task.status = "processing"
-                self._save_task(task, task_file)
-
-                # Generate plan (local processing only)
-                plan = self.plan_generator.generate_plan(task)
-
-                # Append plan to task file
-                self._append_plan_to_task(task, plan, task_file)
-
-                # Move task to Done
-                self.task_creator.move_task_to_done(task.id)
-
-                # Log success
-                self._log_activity(
-                    LogEntry(
-                        action_type="plan_generated",
-                        task_id=task.id,
-                        details=f"Generated plan with {len(plan.steps)} steps",
-                        outcome="success",
-                    )
-                )
-
-                self._log_activity(
-                    LogEntry(
-                        action_type="task_moved",
-                        task_id=task.id,
-                        details=f"Moved task to Done",
-                        outcome="success",
-                    )
-                )
-
-                # Update dashboard
-                self.dashboard_updater.decrement_needs_action()
-                self.dashboard_updater.increment_done()
-
-                processed_count += 1
-                logger.success(f"Successfully processed task {task.id}")
-
-            except Exception as e:
-                logger.error(f"Failed to process task {task_file.name}: {e}")
-
-                # Log error
-                self._log_activity(
-                    LogEntry(
-                        action_type="error",
-                        task_id=task_file.stem.replace("task-", ""),
-                        details=f"Failed to process: {str(e)}",
-                        outcome="failure",
-                    )
-                )
-
-                # Update task status to error
-                try:
-                    task = self._load_task(task_file)
-                    task.status = "error"
-                    task.error_message = str(e)
-                    self._save_task(task, task_file)
-                except Exception as save_error:
-                    logger.error(f"Failed to update task status: {save_error}")
-
-        logger.info(f"Processing cycle complete: {processed_count} tasks processed")
-        return processed_count
-
-    def _load_task(self, task_file: Path) -> Task:
-        """Load task from file"""
-        content = task_file.read_text(encoding="utf-8")
-        return Task.from_markdown(content)
-
-    def _save_task(self, task: Task, task_file: Path) -> None:
-        """Save task to file"""
-        task_file.write_text(task.to_markdown(), encoding="utf-8")
-
-    def _append_plan_to_task(self, task: Task, plan: Plan, task_file: Path) -> None:
+    def count_pending_tasks(self) -> int:
         """
-        Append plan to task file in Needs_Action
+        Count pending tasks in /Needs_Action
 
-        Args:
-            task: Task object
-            plan: Plan object
-            task_file: Path to task file
+        Returns:
+            Number of pending tasks
         """
-        # Read current task content
-        current_content = task_file.read_text(encoding="utf-8")
-
-        # Build plan section
-        plan_section = "\n\n---\n\n## AI Generated Plan\n\n"
-
-        for i, step in enumerate(plan.steps, 1):
-            if (i - 1) in plan.approval_checkpoints:
-                plan_section += f"{i}. **[APPROVAL REQUIRED]** {step}\n"
-            else:
-                plan_section += f"{i}. {step}\n"
-
-        if plan.warnings:
-            plan_section += "\n### Warnings\n"
-            for warning in plan.warnings:
-                plan_section += f"- {warning}\n"
-
-        # Append plan to task file
-        updated_content = current_content + plan_section
-        task_file.write_text(updated_content, encoding="utf-8")
-        logger.info(f"Appended plan to task file: {task_file}")
+        return len(list(self.needs_action_folder.glob("task-*.md")))
 
     def _log_activity(self, entry: LogEntry) -> None:
         """Write log entry to activity log"""
@@ -185,48 +66,3 @@ class TaskProcessor:
                 f.write(entry.to_log_line() + "\n")
         except Exception as e:
             logger.error(f"Failed to write to activity log: {e}")
-
-    def run_loop(self) -> None:
-        """
-        Run processing loop until queue is empty or max iterations reached
-
-        This is for Phase 6: User Story 3 - Autonomous Processing Loop
-        """
-        logger.info("Starting autonomous processing loop")
-
-        iteration = 0
-        while iteration < self.max_iterations:
-            # Check if there are tasks to process
-            task_files = list(self.needs_action_folder.glob("task-*.md"))
-
-            if not task_files:
-                logger.info("Queue empty, stopping loop")
-                self._log_activity(
-                    LogEntry(
-                        action_type="system_stop",
-                        details="Processing loop completed: queue empty",
-                        outcome="success",
-                    )
-                )
-                break
-
-            # Process tasks
-            processed = self.process_tasks()
-
-            if processed == 0:
-                logger.warning("No tasks processed, stopping loop")
-                break
-
-            iteration += 1
-
-        if iteration >= self.max_iterations:
-            logger.warning(f"Max iterations ({self.max_iterations}) reached")
-            self._log_activity(
-                LogEntry(
-                    action_type="warning",
-                    details=f"Max iterations ({self.max_iterations}) reached",
-                    outcome="skipped",
-                )
-            )
-
-        logger.info(f"Processing loop complete: {iteration} iterations")

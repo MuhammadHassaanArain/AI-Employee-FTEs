@@ -1,5 +1,5 @@
 """
-CLI entry point for AI Employee
+CLI entry point for AI Employee (Bronze Tier - Claude Code Integration)
 """
 
 import sys
@@ -11,7 +11,7 @@ from ai_employee.vault.manager import VaultManager
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description="Personal AI Employee - Bronze Tier",
+        description="Personal AI Employee - Bronze Tier (Claude Code Integration)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -25,22 +25,17 @@ def main():
         help="Path to create vault (default: ./ai_employee_vault)",
     )
 
-    # Run command
-    run_parser = subparsers.add_parser("run", help="Run the AI Employee")
-    run_parser.add_argument(
+    # Watch command (replaces "run")
+    watch_parser = subparsers.add_parser("watch", help="Watch for new files and create tasks")
+    watch_parser.add_argument(
         "--vault-path",
         help="Path to Obsidian vault",
     )
-    run_parser.add_argument(
+    watch_parser.add_argument(
         "--watch-folder",
         help="Folder to monitor for new files",
     )
-    run_parser.add_argument(
-        "--max-iterations",
-        type=int,
-        help="Maximum tasks to process per cycle",
-    )
-    run_parser.add_argument(
+    watch_parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         help="Logging level",
@@ -68,13 +63,16 @@ def main():
             vault_manager.create_vault()
             print(f"[OK] Vault initialized at: {args.vault_path}")
             print(f"[OK] Open in Obsidian: {args.vault_path}")
+            print(f"\nNext steps:")
+            print(f"  1. Run: python -m ai_employee watch")
+            print(f"  2. Drop files in: {args.vault_path}/Inbox")
+            print(f"  3. Process tasks: python claude_runner.py")
 
-        elif args.command == "run":
+        elif args.command == "watch":
             # Load configuration
             config = Config(
                 vault_path=args.vault_path,
                 watch_folder=args.watch_folder,
-                max_iterations=args.max_iterations,
                 log_level=args.log_level,
             )
 
@@ -93,25 +91,17 @@ def main():
                 print("ERROR: Vault structure is invalid. Run 'init' first.")
                 sys.exit(1)
 
-            print(f"Starting AI Employee...")
+            print(f"AI Employee - File Watcher (Bronze Tier)")
             print(f"Vault: {config.vault_path}")
             print(f"Watching: {config.watch_folder}")
-            print(f"Max iterations: {config.max_iterations}")
             print(f"Press Ctrl+C to stop\n")
 
             # Start file watcher
             from ai_employee.watcher.file_watcher import FileWatcher
-            from ai_employee.processor.task_processor import TaskProcessor
 
             watcher = FileWatcher(
                 watch_folder=config.watch_folder,
                 vault_path=config.vault_path,
-            )
-
-            # Initialize task processor (Bronze Tier - Local Only)
-            processor = TaskProcessor(
-                vault_path=config.vault_path,
-                max_iterations=config.max_iterations,
             )
 
             try:
@@ -119,25 +109,18 @@ def main():
                 print(f"[OK] File watcher started")
                 print(f"[OK] Monitoring: {config.watch_folder}")
                 print(f"[OK] Dashboard: {config.vault_path / 'Dashboard.md'}")
-                print(f"[OK] Processing tasks automatically\n")
+                print(f"\nWatcher is running. New files will be captured as tasks.")
+                print(f"To process tasks, run: python claude_runner.py\n")
 
-                # Keep running and process tasks periodically
+                # Keep running
                 import time
                 while watcher.is_alive():
-                    # Process any pending tasks
-                    try:
-                        processor.process_tasks()
-                    except Exception as e:
-                        logger.error(f"Error processing tasks: {e}")
-
-                    # Wait before next cycle
-                    time.sleep(10)
+                    time.sleep(1)
 
             except KeyboardInterrupt:
                 print("\n\nShutting down gracefully...")
                 watcher.stop()
                 print("[OK] File watcher stopped")
-                print("[OK] All tasks saved")
                 sys.exit(0)
 
         elif args.command == "config":
@@ -146,9 +129,8 @@ def main():
             print("Current Configuration:")
             print(f"  Vault Path: {config.vault_path}")
             print(f"  Watch Folder: {config.watch_folder}")
-            print(f"  Max Iterations: {config.max_iterations}")
             print(f"  Log Level: {config.log_level}")
-            print(f"  Mode: Bronze Tier (Local Only)")
+            print(f"  Mode: Bronze Tier (Claude Code Integration)")
 
     except KeyboardInterrupt:
         print("\n\nStopped by user")

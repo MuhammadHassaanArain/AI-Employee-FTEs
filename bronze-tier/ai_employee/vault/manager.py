@@ -26,6 +26,7 @@ class VaultManager:
             "inbox": self.vault_path / "Inbox",
             "needs_action": self.vault_path / "Needs_Action",
             "done": self.vault_path / "Done",
+            "plans": self.vault_path / "Plans",
         }
 
     def create_vault(self) -> None:
@@ -108,6 +109,7 @@ class VaultManager:
             "inbox": self.folders["inbox"],
             "needs_action": self.folders["needs_action"],
             "done": self.folders["done"],
+            "plans": self.folders["plans"],
             "dashboard": self.vault_path / "Dashboard.md",
             "handbook": self.vault_path / "Company_Handbook.md",
             "activity_log": self.vault_path / "activity.log",

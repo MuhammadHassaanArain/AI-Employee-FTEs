@@ -1,9 +1,7 @@
-# Core dependencies
-anthropic>=0.18.0
+# Core dependencies (Bronze Tier - No API required)
 watchdog>=4.0.0
 python-frontmatter>=1.0.0
 python-dotenv>=1.0.0
-tenacity>=8.2.0
 pyyaml>=6.0.0
 rich>=13.0.0
 
