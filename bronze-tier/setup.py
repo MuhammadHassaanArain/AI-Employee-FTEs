@@ -12,8 +12,8 @@ setup(
     name="ai-employee-bronze",
     version="1.0.0",
     description="Personal AI Employee - Bronze Tier",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Muhammad Hassaan",
+    author_email="hassaanarain008@gmail.com",
     packages=find_packages(),
     install_requires=[
         "anthropic>=0.18.0",
