@@ -1,0 +1,170 @@
+# Task Schema
+
+**Purpose**: Define the structure for task markdown files in the Obsidian vault
+
+**Version**: 1.0.0
+
+**File Location**: `/Needs_Action/task-{uuid}.md` or `/Done/task-{uuid}.md`
+
+## YAML Frontmatter Schema
+
+```yaml
+# Required fields
+id: string
+  pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  description: UUID v4 identifier for the task
+  example: "550e8400-e29b-41d4-a716-446655440000"
+
+title: string
+  minLength: 1
+  maxLength: 200
+  description: Human-readable task title
+  example: "Review Q4 Budget Report"
+
+source_path: string
+  pattern: ^(/|[A-Z]:\\).+
+  description: Absolute path to original file in monitored folder
+  example: "/home/user/monitored/budget_report.pdf"
+
+created_at: string
+  format: date-time
+  description: ISO 8601 timestamp when task was created
+  example: "2026-02-15T10:30:00Z"
+
+status: string
+  enum: ["needs_action", "processing", "done", "error"]
+  description: Current state of the task
+  default: "needs_action"
+
+original_filename: string
+  minLength: 1
+  description: Original filename from monitored folder
+  example: "budget_report.pdf"
+
+file_size: integer
+  minimum: 0
+  description: Size of original file in bytes
+  example: 2048576
+
+detected_at: string
+  format: date-time
+  description: ISO 8601 timestamp when file was first detected
+  example: "2026-02-15T10:30:15Z"
+
+# Optional fields
+error_message: string
+  description: Error details if status is "error"
+  example: "Failed to parse file content: UnicodeDecodeError"
+```
+
+## Markdown Content Structure
+
+```markdown
+---
+id: "550e8400-e29b-41d4-a716-446655440000"
+title: "Review Q4 Budget Report"
+source_path: "/home/user/monitored/budget_report.pdf"
+created_at: "2026-02-15T10:30:00Z"
+status: "needs_action"
+original_filename: "budget_report.pdf"
+file_size: 2048576
+detected_at: "2026-02-15T10:30:15Z"
+---
+
+# Review Q4 Budget Report
+
+[Original file content or extracted text goes here]
+
+## Metadata
+- **Source**: /home/user/monitored/budget_report.pdf
+- **Detected**: 2026-02-15 10:30:15 UTC
+- **Size**: 2.0 MB
+- **Status**: Needs Action
+```
+
+## Validation Rules
+
+1. **ID Format**: Must be valid UUID v4 (8-4-4-4-12 hex format)
+2. **Title**: Cannot be empty, max 200 characters
+3. **Source Path**: Must be absolute path (starts with / or drive letter)
+4. **Timestamps**: Must be valid ISO 8601 format with timezone
+5. **Status**: Must be one of the four allowed enum values
+6. **File Size**: Must be non-negative integer
+7. **Error Message**: Only present when status is "error"
+
+## Status Transitions
+
+```
+needs_action → processing (when plan generation starts)
+processing → done (when plan created successfully)
+processing → error (when plan generation fails after retries)
+error → needs_action (manual retry by user)
+```
+
+## Example: Valid Task File
+
+```markdown
+---
+id: "a1b2c3d4-e5f6-4789-a012-3456789abcde"
+title: "Process Invoice #12345"
+source_path: "/Users/john/monitored/invoice_12345.pdf"
+created_at: "2026-02-15T14:22:30Z"
+status: "needs_action"
+original_filename: "invoice_12345.pdf"
+file_size: 524288
+detected_at: "2026-02-15T14:22:35Z"
+---
+
+# Process Invoice #12345
+
+Invoice from Acme Corp for consulting services.
+
+**Amount**: $1,250.00
+**Due Date**: 2026-03-01
+**Payment Terms**: Net 30
+
+## Metadata
+- **Source**: /Users/john/monitored/invoice_12345.pdf
+- **Detected**: 2026-02-15 14:22:35 UTC
+- **Size**: 512 KB
+- **Status**: Needs Action
+```
+
+## Example: Task with Error
+
+```markdown
+---
+id: "f1e2d3c4-b5a6-4987-a654-321098765fed"
+title: "Unknown File Type"
+source_path: "/Users/john/monitored/data.bin"
+created_at: "2026-02-15T15:10:00Z"
+status: "error"
+original_filename: "data.bin"
+file_size: 1048576
+detected_at: "2026-02-15T15:10:05Z"
+error_message: "Failed to parse file content: Binary file not supported"
+---
+
+# Unknown File Type
+
+[Unable to extract content from binary file]
+
+## Error Details
+- **Error**: Failed to parse file content: Binary file not supported
+- **Recommendation**: Convert to text format or manually process
+
+## Metadata
+- **Source**: /Users/john/monitored/data.bin
+- **Detected**: 2026-02-15 15:10:05 UTC
+- **Size**: 1.0 MB
+- **Status**: Error
+```
+
+## Implementation Notes
+
+- Use `python-frontmatter` library for parsing and generation
+- Validate all required fields before writing file
+- Generate UUID v4 using Python's `uuid.uuid4()`
+- Use `datetime.utcnow().isoformat() + 'Z'` for timestamps
+- Sanitize title to remove special characters that break filenames
+- Handle file encoding errors gracefully (default to UTF-8)
