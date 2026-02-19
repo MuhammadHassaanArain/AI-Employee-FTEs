@@ -1,13 +1,24 @@
 # Approval Request
 
-**Task ID**: 9955f330-df7b-4e91-bcb5-be38c154adfd
-**Task Title**: Send email to client about payment
-**Created**: 2026-02-19T14:21:47.821942
+**Task ID**: 1bf52db7-baf2-440c-aaf6-4e05978ad94d
+**Task Title**: Send email to client@example.com
+**Created**: 2026-02-19T15:01:45.601021
 **Timeout**: 24 hours
 
 ## Task Content
 
-Send an email to client@example.com requesting payment of $5000 for invoice #12345. Due date is March 1st.
+Send email to client@example.com
+
+  Subject: Project Update
+
+  Please send an email with the following:
+  - Project is on track
+  - Delivery date: March 15th
+  - Next meeting: March 1st
+
+  Best regards,
+  AI Employee
+  EOF
 
 ## Generated Plan
 
@@ -21,12 +32,13 @@ Send an email to client@example.com requesting payment of $5000 for invoice #123
 
 ## Handbook Rules Applied
 
+- [CRITICAL] Never delete original files.
+- [HIGH] Ask for approval before sending emails.
 
 
 ## Warnings
 
 - External communication - review for company policy compliance
-- Task originated from email - verify sender authenticity
 
 
 ---

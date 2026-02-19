@@ -1,0 +1,25 @@
+---
+created_at: '2026-02-19T10:01:35.906452Z'
+detected_at: '2026-02-19T10:01:35.906317Z'
+file_size: 233
+id: 1bf52db7-baf2-440c-aaf6-4e05978ad94d
+original_filename: email-task.txt
+source: file
+source_metadata: {}
+source_path: D:\Hassaan_Work\GIAIC\Quarter-04\Hackathons\hackathon-0\AI-Employee-FTEs\silver-tier\ai_employee_vault\Inbox\email-task.txt
+status: needs_action
+title: Send email to client@example.com
+---
+
+Send email to client@example.com
+
+  Subject: Project Update
+
+  Please send an email with the following:
+  - Project is on track
+  - Delivery date: March 15th
+  - Next meeting: March 1st
+
+  Best regards,
+  AI Employee
+  EOF
