@@ -7,9 +7,13 @@
 
 ## Activity Log
 
-[2026-02-19T09:37:20.261751Z] TASK_CREATED 2cc42db6-a0be-4c4a-8466-934247cf7867 Created task: Send email to client@example.com success
-[2026-02-19T09:37:19.999590Z] FILE_DETECTED N/A Detected new file: email-task.txt success
-[2026-02-19T09:36:39.640963Z] TASK_CREATED 4e8116a5-18ff-44e0-92ac-2ee62a2c8d84 Created task: Test task for AI Employee success
-[2026-02-19T09:36:39.553805Z] FILE_DETECTED N/A Detected new file: research-task.txt success
-[2026-02-19T09:36:04.626458Z] ERROR N/A Failed to process research-task.txt: [Errno 2] No such file or directory: 'ai_employee_vault\\Needs_Action\\task-a7d6df03-15b9-4e8f-ac12-9794e721b7c6.md' failure
-[2026-02-19T09:36:04.419751Z] FILE_DETECTED N/A Detected new file: research-task.txt success
+[2026-02-19T10:01:35.913545Z] TASK_CREATED 1bf52db7-baf2-440c-aaf6-4e05978ad94d Created task: Send email to client@example.com success
+[2026-02-19 15:01:35] INFO     ai_employee.watcher.task_creator: Created task file: ai_employee_vault\Needs_Action\task-1bf52db7-baf2-440c-aaf6-4e05978ad94d.md
+[2026-02-19 15:01:35] INFO     ai_employee.watcher.task_creator: Creating task from file: ai_employee_vault\Inbox\email-task.txt
+[2026-02-19T10:01:35.895009Z] FILE_DETECTED N/A Detected new file: email-task.txt success
+[2026-02-19 15:01:35] INFO     ai_employee.watchers.file_watcher: New file detected: ai_employee_vault\Inbox\email-task.txt
+[2026-02-19 14:57:41] SUCCESS  ai_employee.watchers.file_watcher: Successfully created task e2f018c7-5d5f-4f22-ad4d-55d1f935dfa6 from ai_employee_vault\Inbox\research-tast.txt
+[2026-02-19T09:57:41.658690Z] TASK_CREATED e2f018c7-5d5f-4f22-ad4d-55d1f935dfa6 Created task: Research the top 3 AI tools in 2026 and summarize in 200 words. success
+[2026-02-19 14:57:41] INFO     ai_employee.watcher.task_creator: Created task file: ai_employee_vault\Needs_Action\task-e2f018c7-5d5f-4f22-ad4d-55d1f935dfa6.md
+[2026-02-19 14:57:41] INFO     ai_employee.watcher.task_creator: Creating task from file: ai_employee_vault\Inbox\research-tast.txt
+[2026-02-19T09:57:41.446324Z] FILE_DETECTED N/A Detected new file: research-tast.txt success

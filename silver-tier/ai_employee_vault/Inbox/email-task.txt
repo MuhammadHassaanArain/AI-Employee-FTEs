@@ -1,24 +1,12 @@
 Send email to client@example.com
 
-Subject: Project Update - Q1 2026
+  Subject: Project Update
 
-Please send an email to client@example.com with the following update:
+  Please send an email with the following:
+  - Project is on track
+  - Delivery date: March 15th
+  - Next meeting: March 1st
 
-Dear Client,
-
-I wanted to provide you with a quick update on the project progress for Q1 2026.
-
-Key achievements:
-- Completed Phase 1 development
-- Successfully deployed to staging environment
-- All unit tests passing
-
-Next steps:
-- User acceptance testing (Week of March 1st)
-- Production deployment (March 15th)
-- Post-launch monitoring
-
-Please let me know if you have any questions.
-
-Best regards,
-AI Employee
+  Best regards,
+  AI Employee
+  EOF
