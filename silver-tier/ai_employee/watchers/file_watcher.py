@@ -287,3 +287,34 @@ class FileWatcher:
     def is_alive(self) -> bool:
         """Check if watcher is running"""
         return self.observer.is_alive()
+
+    def run_once(self) -> int:
+        """
+        Scan watch folder once for new files (non-continuous mode).
+
+        Returns:
+            Number of files processed
+        """
+        # Ensure watch folder exists
+        self.watch_folder.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Scanning folder once: {self.watch_folder}")
+
+        processed = 0
+
+        try:
+            # Get all files in watch folder
+            for file_path in self.watch_folder.iterdir():
+                # Check if should process
+                if not self.event_handler._should_process_file(file_path):
+                    continue
+
+                # Process the file
+                self.event_handler._process_file(file_path)
+                processed += 1
+
+        except Exception as e:
+            logger.error(f"Error scanning folder: {e}")
+
+        logger.info(f"Scan complete. Processed {processed} files.")
+        return processed

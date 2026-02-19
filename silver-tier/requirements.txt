@@ -1,13 +1,28 @@
-# Core dependencies (Bronze Tier - No API required)
+# Personal AI Employee - Silver Tier Dependencies
+
+# Bronze Tier (Core)
+anthropic>=0.18.0
 watchdog>=4.0.0
 python-frontmatter>=1.0.0
 python-dotenv>=1.0.0
+tenacity>=8.2.0
 pyyaml>=6.0.0
-rich>=13.0.0
 
-# Development dependencies
-pytest>=8.0.0
-pytest-mock>=3.12.0
-black>=24.0.0
-pylint>=3.0.0
-flake8>=7.0.0
+# Silver Tier (New)
+schedule>=1.2.0
+
+# Gmail Integration
+google-api-python-client>=2.0.0
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+
+# LinkedIn Integration (using requests for custom implementation)
+requests>=2.31.0
+
+# Development (optional)
+# pytest>=8.0.0
+# pytest-mock>=3.12.0
+# black>=24.0.0
+# pylint>=3.0.0
+# flake8>=7.0.0
