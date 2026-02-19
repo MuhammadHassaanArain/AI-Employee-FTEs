@@ -24,6 +24,9 @@ class Task:
     file_size: int = 0
     detected_at: str = field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
     error_message: str = ""
+    # Silver Tier: Track source of task
+    source: str = "file"  # file, gmail, linkedin, etc.
+    source_metadata: Dict[str, Any] = field(default_factory=dict)  # API-specific data
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for YAML frontmatter"""
@@ -36,6 +39,8 @@ class Task:
             "original_filename": self.original_filename,
             "file_size": self.file_size,
             "detected_at": self.detected_at,
+            "source": self.source,  # Silver Tier
+            "source_metadata": self.source_metadata,  # Silver Tier
         }
         if self.error_message:
             data["error_message"] = self.error_message
@@ -55,6 +60,8 @@ class Task:
             file_size=data.get("file_size", 0),
             detected_at=data.get("detected_at", datetime.utcnow().isoformat() + "Z"),
             error_message=data.get("error_message", ""),
+            source=data.get("source", "file"),  # Silver Tier
+            source_metadata=data.get("source_metadata", {}),  # Silver Tier
         )
 
     def to_markdown(self) -> str:

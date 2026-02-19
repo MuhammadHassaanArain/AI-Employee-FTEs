@@ -27,6 +27,11 @@ class VaultManager:
             "needs_action": self.vault_path / "Needs_Action",
             "done": self.vault_path / "Done",
             "plans": self.vault_path / "Plans",
+            # Silver Tier folders
+            "waiting_approval": self.vault_path / "Waiting_Approval",
+            "approved": self.vault_path / "Approved",
+            "rejected": self.vault_path / "Rejected",
+            "linkedin_queue": self.vault_path / "LinkedIn_Queue",
         }
 
     def create_vault(self) -> None:
@@ -110,6 +115,11 @@ class VaultManager:
             "needs_action": self.folders["needs_action"],
             "done": self.folders["done"],
             "plans": self.folders["plans"],
+            # Silver Tier folders
+            "waiting_approval": self.folders["waiting_approval"],
+            "approved": self.folders["approved"],
+            "rejected": self.folders["rejected"],
+            "linkedin_queue": self.folders["linkedin_queue"],
             "dashboard": self.vault_path / "Dashboard.md",
             "handbook": self.vault_path / "Company_Handbook.md",
             "activity_log": self.vault_path / "activity.log",
