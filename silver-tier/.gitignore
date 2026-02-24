@@ -19,18 +19,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Virtual environments
+# Virtual Environment
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
-
-# Environment variables
-.env
-.env.local
 
 # IDE
 .vscode/
@@ -38,19 +31,43 @@ venv.bak/
 *.swp
 *.swo
 *~
-.DS_Store
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
 
 # Logs
-*.log
 logs/
+*.log
 
-# AI Employee specific
-monitored/
-*.tmp
+# Vault data (keep structure, ignore content)
+ai_employee_vault/Inbox/*
+ai_employee_vault/Needs_Action/*
+ai_employee_vault/Plans/*
+ai_employee_vault/Waiting_Approval/*
+ai_employee_vault/Approved/*
+ai_employee_vault/Rejected/*
+ai_employee_vault/LinkedIn_Posts/*
+ai_employee_vault/Done/*
+ai_employee_vault/activity.log
+ai_employee_vault/.linkedin_tokens.json
+ai_employee_vault/.file_tracker.json
+
+# Keep folder structure
+!ai_employee_vault/Inbox/.gitkeep
+!ai_employee_vault/Needs_Action/.gitkeep
+!ai_employee_vault/Plans/.gitkeep
+!ai_employee_vault/Waiting_Approval/.gitkeep
+!ai_employee_vault/Approved/.gitkeep
+!ai_employee_vault/Rejected/.gitkeep
+!ai_employee_vault/LinkedIn_Posts/.gitkeep
+!ai_employee_vault/Done/.gitkeep
+
+# Development
+.specify/
+.claude/
+specs/
+history/

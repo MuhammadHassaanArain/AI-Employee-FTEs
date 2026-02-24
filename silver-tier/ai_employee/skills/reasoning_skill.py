@@ -381,10 +381,16 @@ class ReasoningSkill:
         # Create plan
         plan = Plan(
             task_id=task.id,
+            task_title=task.title,
+            task_source=task.source,
+            action_type=action_type,
+            entities=[],  # Entities stored separately
             steps=steps,
+            approval_required=needs_approval,
             approval_checkpoints=approval_checkpoints,
-            handbook_rules_applied=applicable_rules[:5],  # Limit to 5 most relevant
+            handbook_rules=applicable_rules[:5],  # Limit to 5 most relevant
             warnings=warnings,
+            reasoning=f"Detected action type: {action_type}. Analyzed {len(entities)} entities. Applied {len(applicable_rules)} handbook rules.",
         )
 
         logger.info(f"Plan generated. Action type: {action_type}, Needs approval: {needs_approval}, Steps: {len(steps)}")
@@ -404,8 +410,12 @@ class ReasoningSkill:
         plan_filename = f"plan-{plan.task_id}.md"
         plan_path = self.plans_folder / plan_filename
 
+        # Set task title in plan
+        if task_title:
+            plan.task_title = task_title
+
         # Convert plan to markdown
-        plan_content = plan.to_markdown(task_title=task_title)
+        plan_content = plan.to_markdown()
 
         # Save to file
         plan_path.write_text(plan_content, encoding="utf-8")

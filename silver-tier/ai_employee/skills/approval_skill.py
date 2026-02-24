@@ -85,7 +85,7 @@ class ApprovalSkill:
 ## Handbook Rules Applied
 
 """
-        for rule in plan.handbook_rules_applied:
+        for rule in plan.handbook_rules:
             approval_content += f"- {rule}\n"
 
         approval_content += f"""
@@ -253,13 +253,17 @@ def main():
 
     test_plan = Plan(
         task_id=test_task.id,
+        task_title=test_task.title,
+        task_source=test_task.source,
+        action_type="email",
         steps=[
             "Draft email content",
             "Send email to client@example.com",
             "Log email sent",
         ],
+        approval_required=True,
         approval_checkpoints=[1],
-        handbook_rules_applied=["[HIGH] Ask for approval before sending emails"],
+        handbook_rules=["[HIGH] Ask for approval before sending emails"],
         warnings=["This action will send an external email"],
     )
 
